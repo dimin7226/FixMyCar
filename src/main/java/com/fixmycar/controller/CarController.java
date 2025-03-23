@@ -1,5 +1,6 @@
 package com.fixmycar.controller;
 
+import com.fixmycar.exception.InvalidInputException;
 import com.fixmycar.model.Car;
 import com.fixmycar.service.CarService;
 import java.util.List;
@@ -27,16 +28,31 @@ public class CarController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Car> getCarById(@PathVariable Long id) {
+        if (id <= 0) {
+            throw new InvalidInputException("Car ID must be a positive number");
+        }
         return ResponseEntity.ok(carService.getCarById(id));
     }
 
     @PostMapping("/customer/{customerId}")
     public ResponseEntity<Car> createCar(@RequestBody Car car, @PathVariable Long customerId) {
+        if (customerId <= 0) {
+            throw new InvalidInputException("Customer ID must be a positive number");
+        }
+        if (car == null) {
+            throw new InvalidInputException("Car details cannot be null");
+        }
         return ResponseEntity.ok(carService.assignToCustomer(car, customerId));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car car) {
+        if (id <= 0) {
+            throw new InvalidInputException("Car ID must be a positive number");
+        }
+        if (car == null) {
+            throw new InvalidInputException("Car details cannot be null");
+        }
         return ResponseEntity.ok(carService.updateCarInfo(id, car));
     }
 
@@ -44,22 +60,37 @@ public class CarController {
     public ResponseEntity<Car> transferCarOwnership(
             @PathVariable Long carId,
             @PathVariable Long newCustomerId) {
+        if (carId <= 0) {
+            throw new InvalidInputException("Car ID must be a positive number");
+        }
+        if (newCustomerId <= 0) {
+            throw new InvalidInputException("New customer ID must be a positive number");
+        }
         return ResponseEntity.ok(carService.transferOwnership(carId, newCustomerId));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
+        if (id <= 0) {
+            throw new InvalidInputException("Car ID must be a positive number");
+        }
         carService.deleteCar(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/customer/{customerId}")
     public List<Car> getCarsByCustomerId(@PathVariable Long customerId) {
+        if (customerId <= 0) {
+            throw new InvalidInputException("Customer ID must be a positive number");
+        }
         return carService.getCarsByCustomerId(customerId);
     }
 
     @GetMapping("/service-center/{serviceCenterId}")
     public List<Car> getCarsByServiceCenterId(@PathVariable Long serviceCenterId) {
+        if (serviceCenterId <= 0) {
+            throw new InvalidInputException("Service center ID must be a positive number");
+        }
         return carService.getCarsByServiceCenterId(serviceCenterId);
     }
 }

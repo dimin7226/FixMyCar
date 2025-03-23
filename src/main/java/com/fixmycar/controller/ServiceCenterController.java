@@ -1,5 +1,6 @@
 package com.fixmycar.controller;
 
+import com.fixmycar.exception.InvalidInputException;
 import com.fixmycar.model.ServiceCenter;
 import com.fixmycar.service.ServiceCenterService;
 import java.util.List;
@@ -26,23 +27,35 @@ public class ServiceCenterController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ServiceCenter> getServiceCenterById(@PathVariable Long id) {
+        if (id <= 0) {
+            throw new InvalidInputException("Service center ID must be a positive number");
+        }
         return ResponseEntity.ok(serviceCenterService.getServiceCenterById(id));
     }
 
     @PostMapping
     public ResponseEntity<ServiceCenter> createServiceCenter(
             @RequestBody ServiceCenter serviceCenter) {
+        if (serviceCenter == null) {
+            throw new InvalidInputException("Service center details cannot be null");
+        }
         return ResponseEntity.ok(serviceCenterService.saveServiceCenter(serviceCenter));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteServiceCenter(@PathVariable Long id) {
+        if (id <= 0) {
+            throw new InvalidInputException("Service center ID must be a positive number");
+        }
         serviceCenterService.deleteServiceCenter(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/car/{carId}")
     public List<ServiceCenter> getServiceCentersByCarId(@PathVariable Long carId) {
+        if (carId <= 0) {
+            throw new InvalidInputException("Car ID must be a positive number");
+        }
         return serviceCenterService.getServiceCentersByCarId(carId);
     }
 }
