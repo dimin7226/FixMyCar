@@ -32,7 +32,10 @@ public class ServiceRequestController {
     }
 
     @PostMapping
-    public ResponseEntity<ServiceRequest> createRequest(@RequestBody ServiceRequest request) {
+    public ResponseEntity<ServiceRequest> createRequest(
+            @RequestBody ServiceRequest request,
+            @RequestParam Long serviceCenterId) {
+        request.getServiceCenter().setId(serviceCenterId);
         return ResponseEntity.ok(requestService.saveRequest(request));
     }
 
