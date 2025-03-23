@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/home/cars")
 @RequiredArgsConstructor
 public class CarController {
+    private static final String CAR_ID_MUST_BE_POSITIVE = "Car ID must be a positive number";
+    private static final String CUSTOMER_ID_MUST_BE_POSITIVE = "Customer ID must be a positive number";
+    private static final String CAR_DETAILS_CANNOT_BE_NULL = "Car details cannot be null";
+    
     private final CarService carService;
 
     @GetMapping
@@ -29,7 +33,7 @@ public class CarController {
     @GetMapping("/{id}")
     public ResponseEntity<Car> getCarById(@PathVariable Long id) {
         if (id <= 0) {
-            throw new InvalidInputException("Car ID must be a positive number");
+            throw new InvalidInputException(CAR_ID_MUST_BE_POSITIVE);
         }
         return ResponseEntity.ok(carService.getCarById(id));
     }
@@ -37,10 +41,10 @@ public class CarController {
     @PostMapping("/customer/{customerId}")
     public ResponseEntity<Car> createCar(@RequestBody Car car, @PathVariable Long customerId) {
         if (customerId <= 0) {
-            throw new InvalidInputException("Customer ID must be a positive number");
+            throw new InvalidInputException(CUSTOMER_ID_MUST_BE_POSITIVE);
         }
         if (car == null) {
-            throw new InvalidInputException("Car details cannot be null");
+            throw new InvalidInputException(CAR_DETAILS_CANNOT_BE_NULL);
         }
         return ResponseEntity.ok(carService.assignToCustomer(car, customerId));
     }
@@ -48,10 +52,10 @@ public class CarController {
     @PutMapping("/{id}")
     public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car car) {
         if (id <= 0) {
-            throw new InvalidInputException("Car ID must be a positive number");
+            throw new InvalidInputException(CAR_ID_MUST_BE_POSITIVE);
         }
         if (car == null) {
-            throw new InvalidInputException("Car details cannot be null");
+            throw new InvalidInputException(CAR_DETAILS_CANNOT_BE_NULL);
         }
         return ResponseEntity.ok(carService.updateCarInfo(id, car));
     }
@@ -61,10 +65,10 @@ public class CarController {
             @PathVariable Long carId,
             @PathVariable Long newCustomerId) {
         if (carId <= 0) {
-            throw new InvalidInputException("Car ID must be a positive number");
+            throw new InvalidInputException(CAR_ID_MUST_BE_POSITIVE);
         }
         if (newCustomerId <= 0) {
-            throw new InvalidInputException("New customer ID must be a positive number");
+            throw new InvalidInputException(CUSTOMER_ID_MUST_BE_POSITIVE);
         }
         return ResponseEntity.ok(carService.transferOwnership(carId, newCustomerId));
     }
@@ -72,7 +76,7 @@ public class CarController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
         if (id <= 0) {
-            throw new InvalidInputException("Car ID must be a positive number");
+            throw new InvalidInputException(CAR_ID_MUST_BE_POSITIVE);
         }
         carService.deleteCar(id);
         return ResponseEntity.noContent().build();
@@ -81,7 +85,7 @@ public class CarController {
     @GetMapping("/customer/{customerId}")
     public List<Car> getCarsByCustomerId(@PathVariable Long customerId) {
         if (customerId <= 0) {
-            throw new InvalidInputException("Customer ID must be a positive number");
+            throw new InvalidInputException(CUSTOMER_ID_MUST_BE_POSITIVE);
         }
         return carService.getCarsByCustomerId(customerId);
     }

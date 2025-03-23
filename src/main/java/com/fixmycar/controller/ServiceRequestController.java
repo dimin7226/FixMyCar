@@ -20,6 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/home/requests")
 @RequiredArgsConstructor
 public class ServiceRequestController {
+    private static final String SERVICE_REQUEST_ID_MUST_BE_POSITIVE = "Service request ID must be a positive number";
+    private static final String CUSTOMER_ID_MUST_BE_POSITIVE = "Customer ID must be a positive number";
+    private static final String CAR_ID_MUST_BE_POSITIVE = "Car ID must be a positive number";
+    private static final String SERVICE_CENTER_ID_MUST_BE_POSITIVE = "Service center ID must be a positive number";
+    private static final String REQUEST_DETAILS_CANNOT_BE_NULL = "Service request details cannot be null";
+    private static final String DESCRIPTION_CANNOT_BE_NULL_OR_EMPTY = "Description cannot be null or empty";
+    private static final String STATUS_CANNOT_BE_NULL_OR_EMPTY = "Status cannot be null or empty";
+    
     private final ServiceRequestService requestService;
 
     @GetMapping
@@ -30,7 +38,7 @@ public class ServiceRequestController {
     @GetMapping("/{id}")
     public ResponseEntity<ServiceRequest> getRequestById(@PathVariable Long id) {
         if (id <= 0) {
-            throw new InvalidInputException("Service request ID must be a positive number");
+            throw new InvalidInputException(SERVICE_REQUEST_ID_MUST_BE_POSITIVE);
         }
         return ResponseEntity.ok(requestService.getRequestById(id));
     }
@@ -38,7 +46,7 @@ public class ServiceRequestController {
     @PostMapping
     public ResponseEntity<ServiceRequest> createRequest(@RequestBody ServiceRequest request) {
         if (request == null) {
-            throw new InvalidInputException("Service request details cannot be null");
+            throw new InvalidInputException(REQUEST_DETAILS_CANNOT_BE_NULL);
         }
         return ResponseEntity.ok(requestService.saveRequest(request));
     }
@@ -46,7 +54,7 @@ public class ServiceRequestController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRequest(@PathVariable Long id) {
         if (id <= 0) {
-            throw new InvalidInputException("Service request ID must be a positive number");
+            throw new InvalidInputException(SERVICE_REQUEST_ID_MUST_BE_POSITIVE);
         }
         requestService.deleteRequest(id);
         return ResponseEntity.noContent().build();
@@ -55,7 +63,7 @@ public class ServiceRequestController {
     @GetMapping("/customer/{customerId}")
     public List<ServiceRequest> getRequestsByCustomerId(@PathVariable Long customerId) {
         if (customerId <= 0) {
-            throw new InvalidInputException("Customer ID must be a positive number");
+            throw new InvalidInputException(CUSTOMER_ID_MUST_BE_POSITIVE);
         }
         return requestService.getRequestsByCustomerId(customerId);
     }
@@ -63,7 +71,7 @@ public class ServiceRequestController {
     @GetMapping("/car/{carId}")
     public List<ServiceRequest> getRequestsByCarId(@PathVariable Long carId) {
         if (carId <= 0) {
-            throw new InvalidInputException("Car ID must be a positive number");
+            throw new InvalidInputException(CAR_ID_MUST_BE_POSITIVE);
         }
         return requestService.getRequestsByCarId(carId);
     }
@@ -71,7 +79,7 @@ public class ServiceRequestController {
     @GetMapping("/service-center/{serviceCenterId}")
     public List<ServiceRequest> getRequestsByServiceCenterId(@PathVariable Long serviceCenterId) {
         if (serviceCenterId <= 0) {
-            throw new InvalidInputException("Service center ID must be a positive number");
+            throw new InvalidInputException(SERVICE_CENTER_ID_MUST_BE_POSITIVE);
         }
         return requestService.getRequestsByServiceCenterId(serviceCenterId);
     }
@@ -83,16 +91,16 @@ public class ServiceRequestController {
             @RequestParam Long serviceCenterId,
             @RequestParam String description) {
         if (carId <= 0) {
-            throw new InvalidInputException("Car ID must be a positive number");
+            throw new InvalidInputException(CAR_ID_MUST_BE_POSITIVE);
         }
         if (customerId <= 0) {
-            throw new InvalidInputException("Customer ID must be a positive number");
+            throw new InvalidInputException(CUSTOMER_ID_MUST_BE_POSITIVE);
         }
         if (serviceCenterId <= 0) {
-            throw new InvalidInputException("Service center ID must be a positive number");
+            throw new InvalidInputException(SERVICE_CENTER_ID_MUST_BE_POSITIVE);
         }
         if (description == null || description.trim().isEmpty()) {
-            throw new InvalidInputException("Description cannot be null or empty");
+            throw new InvalidInputException(DESCRIPTION_CANNOT_BE_NULL_OR_EMPTY);
         }
         return ResponseEntity.ok(requestService.createRequest(
                 carId, customerId, serviceCenterId, description));
@@ -102,10 +110,10 @@ public class ServiceRequestController {
     public ResponseEntity<ServiceRequest> updateStatus(
             @PathVariable Long id, @RequestParam String status) {
         if (id <= 0) {
-            throw new InvalidInputException("Service request ID must be a positive number");
+            throw new InvalidInputException(SERVICE_REQUEST_ID_MUST_BE_POSITIVE);
         }
         if (status == null || status.trim().isEmpty()) {
-            throw new InvalidInputException("Status cannot be null or empty");
+            throw new InvalidInputException(STATUS_CANNOT_BE_NULL_OR_EMPTY);
         }
         return ResponseEntity.ok(requestService.updateStatus(id, status));
     }

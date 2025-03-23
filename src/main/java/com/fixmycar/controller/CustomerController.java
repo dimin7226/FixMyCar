@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/home/customers")
 @RequiredArgsConstructor
 public class CustomerController {
+    private static final String CUSTOMER_ID_MUST_BE_POSITIVE = "Customer ID must be a positive number";
+    private static final String CUSTOMER_DETAILS_CANNOT_BE_NULL = "Customer details cannot be null";
+    private static final String EMAIL_CANNOT_BE_NULL_OR_EMPTY = "Email cannot be null or empty";
+    
     private final CustomerService customerService;
 
     @GetMapping
@@ -29,7 +33,7 @@ public class CustomerController {
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
         if (id <= 0) {
-            throw new InvalidInputException("Customer ID must be a positive number");
+            throw new InvalidInputException(CUSTOMER_ID_MUST_BE_POSITIVE);
         }
         return ResponseEntity.ok(customerService.getCustomerById(id));
     }
@@ -37,7 +41,7 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
         if (customer == null) {
-            throw new InvalidInputException("Customer details cannot be null");
+            throw new InvalidInputException(CUSTOMER_DETAILS_CANNOT_BE_NULL);
         }
         return ResponseEntity.ok(customerService.saveCustomer(customer));
     }
@@ -46,10 +50,10 @@ public class CustomerController {
     public ResponseEntity<Customer> updateCustomer(@PathVariable Long id,
                                                    @RequestBody Customer customer) {
         if (id <= 0) {
-            throw new InvalidInputException("Customer ID must be a positive number");
+            throw new InvalidInputException(CUSTOMER_ID_MUST_BE_POSITIVE);
         }
         if (customer == null) {
-            throw new InvalidInputException("Customer details cannot be null");
+            throw new InvalidInputException(CUSTOMER_DETAILS_CANNOT_BE_NULL);
         }
         customer.setId(id);
         return ResponseEntity.ok(customerService.saveCustomer(customer));
@@ -58,7 +62,7 @@ public class CustomerController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
         if (id <= 0) {
-            throw new InvalidInputException("Customer ID must be a positive number");
+            throw new InvalidInputException(CUSTOMER_ID_MUST_BE_POSITIVE);
         }
         customerService.deleteCustomer(id);
         return ResponseEntity.noContent().build();
@@ -67,7 +71,7 @@ public class CustomerController {
     @GetMapping("/email/{email}")
     public ResponseEntity<Customer> getCustomerByEmail(@PathVariable String email) {
         if (email == null || email.trim().isEmpty()) {
-            throw new InvalidInputException("Email cannot be null or empty");
+            throw new InvalidInputException(EMAIL_CANNOT_BE_NULL_OR_EMPTY);
         }
         return ResponseEntity.ok(customerService.findByEmail(email));
     }
