@@ -1,5 +1,6 @@
 package com.fixmycar.controller;
 
+import com.fixmycar.exception.InvalidInputException;
 import com.fixmycar.model.Customer;
 import com.fixmycar.service.CustomerService;
 import java.util.List;
@@ -27,29 +28,47 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+        if (id <= 0) {
+            throw new InvalidInputException("Customer ID must be a positive number");
+        }
         return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
     @PostMapping
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+        if (customer == null) {
+            throw new InvalidInputException("Customer details cannot be null");
+        }
         return ResponseEntity.ok(customerService.saveCustomer(customer));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(@PathVariable Long id,
                                                    @RequestBody Customer customer) {
+        if (id <= 0) {
+            throw new InvalidInputException("Customer ID must be a positive number");
+        }
+        if (customer == null) {
+            throw new InvalidInputException("Customer details cannot be null");
+        }
         customer.setId(id);
         return ResponseEntity.ok(customerService.saveCustomer(customer));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+        if (id <= 0) {
+            throw new InvalidInputException("Customer ID must be a positive number");
+        }
         customerService.deleteCustomer(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<Customer> getCustomerByEmail(@PathVariable String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new InvalidInputException("Email cannot be null or empty");
+        }
         return ResponseEntity.ok(customerService.findByEmail(email));
     }
 }
