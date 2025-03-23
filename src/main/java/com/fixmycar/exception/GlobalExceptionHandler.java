@@ -3,15 +3,17 @@ package com.fixmycar.exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,37 +41,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
     
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex) {
-        logger.error("Entity not found: {}", ex.getMessage());
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        logger.warn("Type mismatch: {}", ex.getMessage());
+        String message = String.format("'%s' should be a valid %s", 
+                ex.getName(), ex.getRequiredType().getSimpleName());
+        
         Map<String, Object> body = createErrorResponseBody(
-                HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                ex.getMessage()
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                message
         );
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
     
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex) {
+    @ExceptionHandler({NoSuchElementException.class, EmptyResultDataAccessException.class})
+    public ResponseEntity<Object> handleNoSuchElementException(Exception ex) {
         logger.error("Resource not found: {}", ex.getMessage());
         Map<String, Object> body = createErrorResponseBody(
                 HttpStatus.NOT_FOUND.value(),
                 "Not Found",
-                ex.getMessage()
+                "The requested resource could not be found"
         );
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }
-    
-    @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<Object> handleDuplicateResourceException(DuplicateResourceException ex) {
-        logger.warn("Duplicate resource: {}", ex.getMessage());
-        Map<String, Object> body = createErrorResponseBody(
-                HttpStatus.CONFLICT.value(),
-                "Conflict",
-                ex.getMessage()
-        );
-        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
     
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -77,8 +71,7 @@ public class GlobalExceptionHandler {
         logger.warn("Data integrity violation: {}", ex.getMessage());
         String message = "Cannot perform this operation due to data constraint violation";
         
-        // Check for duplicate entry
-        if (ex.getMessage() != null && ex.getMessage().contains("duplicate")) {
+        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("duplicate")) {
             message = "A record with the same unique identifier already exists";
         }
         
