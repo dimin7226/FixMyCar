@@ -9,7 +9,6 @@ import com.fixmycar.repository.CustomerRepository;
 import com.fixmycar.repository.ServiceCenterRepository;
 import com.fixmycar.repository.ServiceRequestRepository;
 import jakarta.transaction.Transactional;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +32,9 @@ public class CarService {
     
     // In-memory cache for cars by ID
     private final Map<Long, Car> carCache = new ConcurrentHashMap<>();
+    
+    // In-memory cache for cars by brand and model
+    private final Map<String, List<Car>> brandModelCarCache = new ConcurrentHashMap<>();
 
     public List<Car> getAllCars() {
         return carRepository.findAll();
@@ -74,11 +76,17 @@ public class CarService {
             serviceCenterCarCache.remove(sc.getName());
         }
         
+        // Invalidate brand and model cache
+        brandModelCarCache.remove(car.getBrand() + "_" + car.getModel());
+        
         return savedCar;
     }
 
     public Car updateCarInfo(Long carId, Car updatedCar) {
         Car existingCar = getCarById(carId);
+        
+        // Store old brand and model for cache invalidation
+        String oldBrandModel = existingCar.getBrand() + "_" + existingCar.getModel();
 
         existingCar.setBrand(updatedCar.getBrand());
         existingCar.setModel(updatedCar.getModel());
@@ -97,6 +105,10 @@ public class CarService {
         for (ServiceCenter sc : savedCar.getServiceCenters()) {
             serviceCenterCarCache.remove(sc.getName());
         }
+        
+        // Invalidate brand and model caches
+        brandModelCarCache.remove(oldBrandModel);
+        brandModelCarCache.remove(savedCar.getBrand() + "_" + savedCar.getModel());
         
         return savedCar;
     }
@@ -120,6 +132,9 @@ public class CarService {
         for (ServiceCenter sc : car.getServiceCenters()) {
             serviceCenterCarCache.remove(sc.getName());
         }
+        
+        // Remove from brand and model cache
+        brandModelCarCache.remove(car.getBrand() + "_" + car.getModel());
     }
 
     @Transactional
@@ -181,6 +196,24 @@ public class CarService {
         
         // Add to cache
         serviceCenterCarCache.put(serviceCenterName, cars);
+        
+        return cars;
+    }
+    
+    public List<Car> getCarsByBrandAndModel(String brand, String model) {
+        // Create a cache key from brand and model
+        String cacheKey = brand + "_" + model;
+        
+        // Check if in cache
+        if (brandModelCarCache.containsKey(cacheKey)) {
+            return brandModelCarCache.get(cacheKey);
+        }
+        
+        // If not in cache, fetch from database
+        List<Car> cars = carRepository.findByBrandAndModel(brand, model);
+        
+        // Add to cache
+        brandModelCarCache.put(cacheKey, cars);
         
         return cars;
     }
@@ -246,5 +279,6 @@ public class CarService {
         carCache.clear();
         customerCarCache.clear();
         serviceCenterCarCache.clear();
+        brandModelCarCache.clear();
     }
 }

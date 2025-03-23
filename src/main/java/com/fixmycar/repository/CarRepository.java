@@ -18,6 +18,11 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     List<Car> findByServiceCentersId(Long serviceCenterId);
     
     /**
+     * Find cars by brand and model parameters
+     */
+    List<Car> findByBrandAndModel(String brand, String model);
+    
+    /**
      * Find cars associated with a service center by service center's name
      * Using JPQL query with JOIN to filter by nested entity
      */
