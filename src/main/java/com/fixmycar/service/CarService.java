@@ -1,13 +1,13 @@
 package com.fixmycar.service;
 
+import com.fixmycar.dao.CarDao;
+import com.fixmycar.dao.CustomerDao;
+import com.fixmycar.dao.ServiceCenterDao;
+import com.fixmycar.dao.ServiceRequestDao;
 import com.fixmycar.model.Car;
 import com.fixmycar.model.Customer;
 import com.fixmycar.model.ServiceCenter;
 import com.fixmycar.model.ServiceRequest;
-import com.fixmycar.repository.CarRepository;
-import com.fixmycar.repository.CustomerRepository;
-import com.fixmycar.repository.ServiceCenterRepository;
-import com.fixmycar.repository.ServiceRequestRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +19,10 @@ import org.springframework.stereotype.Service;
 @Transactional
 @RequiredArgsConstructor
 public class CarService {
-    private final CarRepository carRepository;
-    private final CustomerRepository customerRepository;
-    private final ServiceCenterRepository serviceCenterRepository;
-    private final ServiceRequestRepository serviceRequestRepository;
+    private final CarDao carDao;
+    private final CustomerDao customerDao;
+    private final ServiceCenterDao serviceCenterDao;
+    private final ServiceRequestDao serviceRequestDao;
     
     // In-memory cache for cars by service center name
     private final Map<String, List<Car>> serviceCenterCarCache = new ConcurrentHashMap<>();
@@ -37,7 +37,7 @@ public class CarService {
     private final Map<String, List<Car>> brandModelCarCache = new ConcurrentHashMap<>();
 
     public List<Car> getAllCars() {
-        return carRepository.findAll();
+        return carDao.findAll();
     }
 
     public Car getCarById(Long id) {
@@ -47,8 +47,8 @@ public class CarService {
         }
         
         // If not in cache, fetch from database
-        Car car = carRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("Машина не найдена"));
+        Car car = carDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Машина не найдена"));
                 
         // Add to cache
         carCache.put(id, car);
@@ -58,12 +58,12 @@ public class CarService {
     public Car saveCar(Car car) {
         // Проверяем, есть ли у машины клиент
         if (car.getCustomer() != null && car.getCustomer().getId() != null) {
-            Customer customer = customerRepository.findById(car.getCustomer().getId())
+            Customer customer = customerDao.findById(car.getCustomer().getId())
                     .orElseThrow(() -> new RuntimeException("Клиент не найден"));
             car.setCustomer(customer);
         }
         
-        Car savedCar = carRepository.save(car);
+        Car savedCar = carDao.save(car);
         
         // Update cache
         carCache.put(savedCar.getId(), savedCar);
@@ -93,7 +93,7 @@ public class CarService {
         existingCar.setVin(updatedCar.getVin());
         existingCar.setYear(updatedCar.getYear());
 
-        Car savedCar = carRepository.save(existingCar);
+        Car savedCar = carDao.save(existingCar);
         
         // Update cache
         carCache.put(savedCar.getId(), savedCar);
@@ -114,15 +114,15 @@ public class CarService {
     }
 
     public void deleteCar(Long id) {
-        Car car = carRepository.findById(id)
+        Car car = carDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("Car not found"));
 
         List<ServiceRequest> serviceRequests = car.getServiceRequests();
         if (serviceRequests != null && !serviceRequests.isEmpty()) {
-            serviceRequestRepository.deleteAll(serviceRequests);
+            serviceRequestDao.deleteAll(serviceRequests);
         }
 
-        carRepository.delete(car);
+        carDao.delete(car);
         
         // Remove from caches
         carCache.remove(id);
@@ -140,7 +140,7 @@ public class CarService {
     @Transactional
     public Car transferOwnership(Long carId, Long newCustomerId) {
         Car car = getCarById(carId);
-        Customer newOwner = customerRepository.findById(newCustomerId)
+        Customer newOwner = customerDao.findById(newCustomerId)
                 .orElseThrow(() ->
                         new RuntimeException("Customer not found with id: " + newCustomerId));
 
@@ -157,7 +157,7 @@ public class CarService {
         // Add car to new owner's cars list
         newOwner.getCars().add(car);
 
-        Car savedCar = carRepository.save(car);
+        Car savedCar = carDao.save(car);
         
         // Update caches
         carCache.put(savedCar.getId(), savedCar);
@@ -173,7 +173,7 @@ public class CarService {
         }
         
         // If not in cache, fetch from database
-        List<Car> cars = carRepository.findByCustomerId(customerId);
+        List<Car> cars = carDao.findByCustomerId(customerId);
         
         // Add to cache
         customerCarCache.put(customerId, cars);
@@ -182,7 +182,7 @@ public class CarService {
     }
 
     public List<Car> getCarsByServiceCenterId(Long serviceCenterId) {
-        return carRepository.findWithCustomerAndServiceCentersByServiceCentersId(serviceCenterId);
+        return carDao.findWithCustomerAndServiceCentersByServiceCentersId(serviceCenterId);
     }
     
     public List<Car> getCarsByServiceCenterName(String serviceCenterName) {
@@ -192,7 +192,7 @@ public class CarService {
         }
         
         // If not in cache, fetch from database using the custom query
-        List<Car> cars = carRepository.findByServiceCentersName(serviceCenterName);
+        List<Car> cars = carDao.findByServiceCentersName(serviceCenterName);
         
         // Add to cache
         serviceCenterCarCache.put(serviceCenterName, cars);
@@ -210,7 +210,7 @@ public class CarService {
         }
         
         // If not in cache, fetch from database
-        List<Car> cars = carRepository.findByBrandAndModel(brand, model);
+        List<Car> cars = carDao.findByBrandAndModel(brand, model);
         
         // Add to cache
         brandModelCarCache.put(cacheKey, cars);
@@ -219,14 +219,14 @@ public class CarService {
     }
 
     public Car assignToCustomer(Car car, Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
+        Customer customer = customerDao.findById(customerId)
                 .orElseThrow(() ->
                         new RuntimeException("Customer not found with id: " + customerId));
 
         car.setCustomer(customer);
         customer.getCars().add(car);
 
-        Car savedCar = carRepository.save(car);
+        Car savedCar = carDao.save(car);
         
         // Update caches
         carCache.put(savedCar.getId(), savedCar);
@@ -237,14 +237,14 @@ public class CarService {
 
     public Car addToServiceCenter(Long carId, Long serviceCenterId) {
         Car car = getCarById(carId);
-        ServiceCenter serviceCenter = serviceCenterRepository.findById(serviceCenterId)
+        ServiceCenter serviceCenter = serviceCenterDao.findById(serviceCenterId)
                 .orElseThrow(() -> new RuntimeException("Сервисный центр не найден"));
 
         if (!car.getServiceCenters().contains(serviceCenter)) {
             car.getServiceCenters().add(serviceCenter);
         }
 
-        Car savedCar = carRepository.save(car);
+        Car savedCar = carDao.save(car);
         
         // Update caches
         carCache.put(savedCar.getId(), savedCar);
@@ -257,12 +257,12 @@ public class CarService {
     public Car removeFromServiceCenter(Long carId, Long serviceCenterId) {
         Car car = getCarById(carId);
         
-        ServiceCenter serviceCenter = serviceCenterRepository.findById(serviceCenterId)
+        ServiceCenter serviceCenter = serviceCenterDao.findById(serviceCenterId)
                 .orElseThrow(() -> new RuntimeException("Сервисный центр не найден"));
         
         car.getServiceCenters().removeIf(sc -> sc.getId().equals(serviceCenterId));
 
-        Car savedCar = carRepository.save(car);
+        Car savedCar = carDao.save(car);
         
         // Update caches
         carCache.put(savedCar.getId(), savedCar);
