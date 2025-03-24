@@ -2,11 +2,9 @@ package com.fixmycar.service;
 
 import com.fixmycar.dao.CarDao;
 import com.fixmycar.dao.CustomerDao;
-import com.fixmycar.dao.ServiceCenterDao;
 import com.fixmycar.dao.ServiceRequestDao;
 import com.fixmycar.model.Car;
 import com.fixmycar.model.Customer;
-import com.fixmycar.model.ServiceCenter;
 import com.fixmycar.model.ServiceRequest;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -21,11 +19,7 @@ import org.springframework.stereotype.Service;
 public class CarService {
     private final CarDao carDao;
     private final CustomerDao customerDao;
-    private final ServiceCenterDao serviceCenterDao;
     private final ServiceRequestDao serviceRequestDao;
-
-    // In-memory cache for cars by service center name
-    private final Map<String, List<Car>> serviceCenterCarCache = new ConcurrentHashMap<>();
 
     // In-memory cache for cars by customer ID
     private final Map<Long, List<Car>> customerCarCache = new ConcurrentHashMap<>();
@@ -72,9 +66,6 @@ public class CarService {
         if (car.getCustomer() != null) {
             customerCarCache.remove(car.getCustomer().getId());
         }
-        for (ServiceCenter sc : car.getServiceCenters()) {
-            serviceCenterCarCache.remove(sc.getName());
-        }
 
         // Invalidate brand and model cache
         brandModelCarCache.remove(car.getBrand() + "_" + car.getModel());
@@ -97,9 +88,6 @@ public class CarService {
 
         if (savedCar.getCustomer() != null) {
             customerCarCache.remove(savedCar.getCustomer().getId());
-        }
-        for (ServiceCenter sc : savedCar.getServiceCenters()) {
-            serviceCenterCarCache.remove(sc.getName());
         }
 
         String oldBrandModel = existingCar.getBrand() + "_" + existingCar.getModel();
@@ -125,9 +113,6 @@ public class CarService {
         carCache.remove(id);
         if (car.getCustomer() != null) {
             customerCarCache.remove(car.getCustomer().getId());
-        }
-        for (ServiceCenter sc : car.getServiceCenters()) {
-            serviceCenterCarCache.remove(sc.getName());
         }
 
         // Remove from brand and model cache
@@ -178,25 +163,6 @@ public class CarService {
         return cars;
     }
 
-    public List<Car> getCarsByServiceCenterId(Long serviceCenterId) {
-        return carDao.findWithCustomerAndServiceCentersByServiceCentersId(serviceCenterId);
-    }
-
-    public List<Car> getCarsByServiceCenterName(String serviceCenterName) {
-        // Check if in cache
-        if (serviceCenterCarCache.containsKey(serviceCenterName)) {
-            return serviceCenterCarCache.get(serviceCenterName);
-        }
-
-        // If not in cache, fetch from database using the custom query
-        List<Car> cars = carDao.findByServiceCentersName(serviceCenterName);
-
-        // Add to cache
-        serviceCenterCarCache.put(serviceCenterName, cars);
-
-        return cars;
-    }
-
     public List<Car> getCarsByBrandAndModel(String brand, String model) {
         // Create a cache key from brand and model
         String cacheKey = brand + "_" + model;
@@ -232,47 +198,9 @@ public class CarService {
         return savedCar;
     }
 
-    public Car addToServiceCenter(Long carId, Long serviceCenterId) {
-        Car car = getCarById(carId);
-        ServiceCenter serviceCenter = serviceCenterDao.findById(serviceCenterId)
-                .orElseThrow(() -> new RuntimeException("Сервисный центр не найден"));
-
-        if (!car.getServiceCenters().contains(serviceCenter)) {
-            car.getServiceCenters().add(serviceCenter);
-        }
-
-        Car savedCar = carDao.save(car);
-
-        // Update caches
-        carCache.put(savedCar.getId(), savedCar);
-        // Invalidate service center cache
-        serviceCenterCarCache.remove(serviceCenter.getName());
-
-        return savedCar;
-    }
-
-    public Car removeFromServiceCenter(Long carId, Long serviceCenterId) {
-        Car car = getCarById(carId);
-
-        ServiceCenter serviceCenter = serviceCenterDao.findById(serviceCenterId)
-                .orElseThrow(() -> new RuntimeException("Сервисный центр не найден"));
-
-        car.getServiceCenters().removeIf(sc -> sc.getId().equals(serviceCenterId));
-
-        Car savedCar = carDao.save(car);
-
-        // Update caches
-        carCache.put(savedCar.getId(), savedCar);
-        // Invalidate service center cache
-        serviceCenterCarCache.remove(serviceCenter.getName());
-
-        return savedCar;
-    }
-
     public void clearCaches() {
         carCache.clear();
         customerCarCache.clear();
-        serviceCenterCarCache.clear();
         brandModelCarCache.clear();
     }
 }
