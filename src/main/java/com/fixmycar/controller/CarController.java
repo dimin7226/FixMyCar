@@ -65,6 +65,16 @@ public class CarController {
             @RequestParam String model) {
         return carService.getCarsByBrandAndModel(brand, model);
     }
+    
+    @GetMapping("/search/brand")
+    public List<Car> getCarsByBrand(@RequestParam String brand) {
+        return carService.getCarsByBrand(brand);
+    }
+    
+    @GetMapping("/search/model")
+    public List<Car> getCarsByModel(@RequestParam String model) {
+        return carService.getCarsByModel(model);
+    }
 
     @DeleteMapping("/cache")
     public ResponseEntity<Void> clearCache() {
