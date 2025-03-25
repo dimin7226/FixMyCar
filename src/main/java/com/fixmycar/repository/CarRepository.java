@@ -16,8 +16,19 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     List<Car> findByBrandAndModel(String brand, String model);
 
+    List<Car> findByBrand(String brand);
+
+    List<Car> findByModel(String model);
+
     @Query(value = "SELECT * FROM car c WHERE c.brand = :brand AND c.model = :model",
             nativeQuery = true)
     List<Car> findByBrandAndModelNative(@Param("brand") String brand, @Param("model") String model);
 
+    @Query(value = "SELECT * FROM car c WHERE c.brand = :brand",
+            nativeQuery = true)
+    List<Car> findByBrandNative(@Param("brand") String brand);
+
+    @Query(value = "SELECT * FROM car c WHERE c.model = :model",
+            nativeQuery = true)
+    List<Car> findByModelNative(@Param("model") String model);
 }
