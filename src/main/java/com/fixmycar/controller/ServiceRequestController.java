@@ -51,6 +51,14 @@ public class ServiceRequestController {
         return requestService.getRequestsByServiceCenterId(serviceCenterId);
     }
 
+    @GetMapping("/by-car-attributes")
+    public List<ServiceRequest> getRequestsByCarAttributes(
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String model,
+            @RequestParam(required = false) Integer year) {
+        return requestService.getRequestsByCarAttributes(brand, model, year);
+    }
+
     @PostMapping
     public ResponseEntity<ServiceRequest> createCompleteRequest(
             @RequestParam Long customerId,

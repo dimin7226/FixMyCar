@@ -97,6 +97,10 @@ public class ServiceRequestService {
         return requestRepository.findByServiceCenterId(serviceCenterId);
     }
 
+    public List<ServiceRequest> getRequestsByCarAttributes(String brand, String model, Integer year) {
+        return requestRepository.findByCarAttributes(brand, model, year);
+    }
+
     public ServiceRequest createServiceRequest(Long customerId, Long carId,
                                                Long serviceCenterId, String description) {
         Customer customer = customerRepository.findById(customerId)
