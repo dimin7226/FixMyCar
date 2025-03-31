@@ -2,6 +2,7 @@ package com.fixmycar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,17 +29,17 @@ public class ServiceRequest {
     private LocalDateTime createdAt;
     private String status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id")
     @JsonIgnoreProperties({"serviceRequests", "customer", "serviceCenters"})
     private Car car;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     @JsonIgnoreProperties({"serviceRequests", "cars"})
     private Customer customer;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_center_id")
     @JsonIgnoreProperties({"serviceRequests", "cars"})
     private ServiceCenter serviceCenter;
