@@ -55,6 +55,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    // Обработка HandledRestException (400)
+    @ExceptionHandler(HandledRestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Map<String, Object>> handleHandledRestException(HandledRestException ex) {
+        // Логируем ошибку с уровнем ERROR
+        logger.error("Handled REST exception: {}", ex.getMessage());
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("message", ex.getMessage());
+        
+        if (ex.getDetails() != null) {
+            response.put("details", ex.getDetails());
+        }
+        
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     // Обработка других исключений (500)
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -70,3 +88,17 @@ public class GlobalExceptionHandler {
                 + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
+```# CODE
+
+The next part of our plan is to introduce a new custom exception class, `HandledRestException`, which will encapsulate details about error messages for logging and client communication. This exception will represent handled, non-fatal errors that should result in a 400 Bad Request response. It will provide a more descriptive error response to clients and ensure consistent error handling across all endpoints.
+
+<mermaid>
+graph TD
+    Start[Start: Create HandledRestException] --> A[Define class structure]
+    A --> B[Create constructors with different parameter options]
+    B --> C[Define method to get error details]
+    C --> D[Implement toString method for logging]
+    D --> End[HandledRestException ready for use in handlers]
+</mermaid>
+
+(added src/main/java/com/fixmycar/exception/HandledRestException.java)
