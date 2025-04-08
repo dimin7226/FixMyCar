@@ -12,8 +12,8 @@ public class SwaggerConfig {
     public OpenAPI customOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Finance Tracker API")
+                        .title("FixMyCar API")
                         .version("1.0")
-                        .description("API для управления финансами."));
+                        .description("API для управления автомобилями."));
     }
 }

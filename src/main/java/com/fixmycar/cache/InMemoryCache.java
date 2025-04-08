@@ -70,7 +70,6 @@ public class InMemoryCache<K, V> {
     }
 
     public void put(K key, V value) {
-        // Если кэш достиг максимального размера, очищаем его
         if (cache.size() >= maxSize) {
             logger.info("Cache maximum size reached. Clearing cache.");
             clear();

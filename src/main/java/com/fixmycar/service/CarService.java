@@ -1,6 +1,7 @@
 package com.fixmycar.service;
 
 import com.fixmycar.cache.InMemoryCache;
+import com.fixmycar.dto.CarDto;
 import com.fixmycar.exception.ResourceNotFoundException;
 import com.fixmycar.model.Car;
 import com.fixmycar.model.Customer;
@@ -21,6 +22,15 @@ public class CarService {
     private final CarRepository carRepository;
     private final CustomerRepository customerRepository;
     private final InMemoryCache<Long, Car> carCache;
+
+    public CarDto carDto(CarDto entity) {
+        CarDto dto = new CarDto();
+        dto.setBrand(entity.getBrand());
+        dto.setModel(entity.getModel());
+        dto.setVin(entity.getVin());
+        dto.setYear(entity.getYear());
+        return dto;
+    }
 
     public List<Car> getAllCars() {
         return carRepository.findAll();
