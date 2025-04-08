@@ -18,7 +18,7 @@ public class InMemoryCache<K, V> {
     private static class CacheEntry<V> {
         @Getter
         private final V value;
-        private final long expiryTime;
+        private long expiryTime;
 
         public CacheEntry(V value, long expiryTime) {
             this.value = value;
@@ -27,6 +27,10 @@ public class InMemoryCache<K, V> {
 
         public boolean isExpired() {
             return System.currentTimeMillis() >= expiryTime;
+        }
+
+        public void updateExpiryTime(long newExpiryTime) {
+            this.expiryTime = newExpiryTime;
         }
     }
 
@@ -59,12 +63,13 @@ public class InMemoryCache<K, V> {
             cache.remove(key);
             return null;
         }
+
+        entry.updateExpiryTime(System.currentTimeMillis() + ttlMillis);
         logger.info("Cache hit for key: {}", key);
         return entry.getValue();
     }
 
     public void put(K key, V value) {
-        // Если кэш достиг максимального размера, очищаем его
         if (cache.size() >= maxSize) {
             logger.info("Cache maximum size reached. Clearing cache.");
             clear();
