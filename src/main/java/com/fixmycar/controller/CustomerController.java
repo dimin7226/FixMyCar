@@ -1,5 +1,6 @@
 package com.fixmycar.controller;
 
+import com.fixmycar.exception.BadRequestException;
 import com.fixmycar.exception.ResourceNotFoundException;
 import com.fixmycar.model.Customer;
 import com.fixmycar.service.CustomerService;
@@ -7,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +29,8 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping
+    @Operation(summary = "Получить список клиентов",
+            description = "Возвращает клиентов")
     public List<Customer> getAllCustomers() {
         return customerService.getAllCustomers();
     }
@@ -46,28 +51,50 @@ public class CustomerController {
     @Operation(summary = "Создать клиента", description = "Создает нового клиента")
     @ApiResponse(responseCode = "200", description = "Клиент успешно создан")
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
-    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) {
+
+        if (customerService.existsByEmail(customer.getEmail())) {
+            throw new BadRequestException("Email already exists");
+        }
+
+        if (customerService.existsByPhone(customer.getPhone())) {
+            throw new BadRequestException("Phone number already exists");
+        }
+
         Customer createdCustomer = customerService.saveOrUpdateCustomer(customer);
         return ResponseEntity.ok(createdCustomer);
     }
+
 
     @PutMapping("/{id}")
     @Operation(summary = "Обновить данные о клиенте",
             description = "Обновляет данные о клиенте по ID")
     @ApiResponse(responseCode = "200", description = "Данные о клиенте обновлены")
-    @ApiResponse(responseCode = "404", description = "Данные о клиенте не найдены")
+    @ApiResponse(responseCode = "400", description = "Некорректные данные")
+    @ApiResponse(responseCode = "404", description = "Клиент не найден")
     public ResponseEntity<Customer> updateCustomer(@PathVariable Long id,
-                                                   @RequestBody Customer customer) {
-        Customer customerDetails = customerService.getCustomerById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Customer not found with id " + id));
-        customer.setFirstName(customerDetails.getFirstName());
-        customer.setLastName(customerDetails.getLastName());
-        customer.setPhone(customerDetails.getPhone());
-        customer.setEmail(customerDetails.getEmail());
-        Customer updatedCustomer = customerService.saveOrUpdateCustomer(customer);
+                                                   @Valid @RequestBody Customer customer) {
+
+        Customer existing = customerService.getCustomerById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + id));
+
+        if (customerService.existsByEmailAndIdNot(customer.getEmail(), id)) {
+            throw new BadRequestException("Email already exists");
+        }
+
+        if (customerService.existsByPhoneAndIdNot(customer.getPhone(), id)) {
+            throw new BadRequestException("Phone number already exists");
+        }
+
+        existing.setFirstName(customer.getFirstName());
+        existing.setLastName(customer.getLastName());
+        existing.setPhone(customer.getPhone());
+        existing.setEmail(customer.getEmail());
+
+        Customer updatedCustomer = customerService.saveOrUpdateCustomer(existing);
         return ResponseEntity.ok(updatedCustomer);
     }
+
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить клиента", description = "Удаляет клиента по ID")

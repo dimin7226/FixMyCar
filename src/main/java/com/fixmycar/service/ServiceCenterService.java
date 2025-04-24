@@ -24,14 +24,9 @@ public class ServiceCenterService {
     }
 
     public Optional<ServiceCenter> getServiceCenterById(Long id) {
-        ServiceCenter cachedServiceCenter = serviceCenterCache.get(id);
-        if (cachedServiceCenter != null) {
-            return Optional.of(cachedServiceCenter);
-        }
-        Optional<ServiceCenter> serviceCenter = serviceCenterRepository.findById(id);
-        serviceCenter.ifPresent(sc -> serviceCenterCache.put(id, sc));
-
-        return serviceCenter;
+        ServiceCenter cached = serviceCenterCache.get(id);
+        if (cached != null) return Optional.of(cached);
+        return serviceCenterRepository.findById(id);
     }
 
     public ServiceCenter saveServiceCenter(ServiceCenter serviceCenter) {

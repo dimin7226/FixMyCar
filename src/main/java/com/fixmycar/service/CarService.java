@@ -63,6 +63,18 @@ public class CarService {
         return savedCar;
     }
 
+    public boolean existsByVinAndIdNot(String vin, Long id) {
+        return carRepository.existsByVinAndIdNot(vin, id);
+    }
+
+    public boolean customerExists(Long customerId) {
+        return customerRepository.existsById(customerId);
+    }
+
+    public boolean existsByVin(String vin) {
+        return carRepository.existsByVin(vin);
+    }
+
     public void deleteCar(Long id) {
         carRepository.deleteById(id);
 

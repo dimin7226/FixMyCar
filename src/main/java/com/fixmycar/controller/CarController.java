@@ -9,16 +9,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/home/cars")
@@ -28,6 +24,8 @@ public class CarController {
     private final CarService carService;
 
     @GetMapping
+    @Operation(summary = "Получить список автомобилей",
+            description = "Возвращает автомобили")
     public List<Car> getAllCars() {
         return carService.getAllCars();
     }
@@ -49,29 +47,80 @@ public class CarController {
     @ApiResponse(responseCode = "200", description = "Машина успешно создана")
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
     public ResponseEntity<Car> createCar(@Valid @RequestBody Car car) {
-        if (car.getCustomer() == null || car.getCustomer().getId() == null) {
-            throw new BadRequestException("User ID is required");
+
+        // Год выпуска
+        if (car.getYear() < 1980 || car.getYear() > 2025) {
+            throw new BadRequestException("Year must be between 1980 and 2025");
         }
-        Car createdAccount = carService.saveOrUpdateCar(car);
-        return ResponseEntity.ok(createdAccount);
+
+        // VIN должен быть уникальным
+        if (carService.existsByVin(car.getVin())) {
+            throw new BadRequestException("Car with this VIN already exists");
+        }
+
+        // Клиент должен существовать
+        if (car.getCustomer() == null || car.getCustomer().getId() == null ||
+                !carService.customerExists(car.getCustomer().getId())) {
+            throw new BadRequestException("Customer with specified ID does not exist");
+        }
+
+        Car createdCar = carService.saveOrUpdateCar(car);
+        return ResponseEntity.ok(createdCar);
+    }
+
+    @PostMapping("/bulk")
+    @Operation(summary = "Массовое создание/обновление автомобилей",
+            description = "Создает или обновляет список автомобилей за одну операцию с возможностью фильтрации по году")
+    @ApiResponse(responseCode = "200", description = "Автомобили успешно обработаны")
+    @ApiResponse(responseCode = "400", description = "Некорректные данные в запросе")
+    public ResponseEntity<List<Car>> processTransactionsBulk(
+            @RequestParam(required = false) Integer yearFilter,
+            @RequestBody List<@Valid Car> cars) {
+
+        Predicate<Car> yearFilterPredicate = (Car car) ->
+                yearFilter == null || car.getYear() == yearFilter;
+
+        List<Car> processedTransactions = cars.stream()
+                .filter(yearFilterPredicate)
+                .map(carService::saveOrUpdateCar)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(processedTransactions);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Обновить данные о машине",
             description = "Обновляет данные о машине по ID")
     @ApiResponse(responseCode = "200", description = "Данные о машине обновлены")
+    @ApiResponse(responseCode = "400", description = "Некорректные данные")
     @ApiResponse(responseCode = "404", description = "Данные о машине не найдены")
     public ResponseEntity<Car> updateCar(@PathVariable Long id,
                                          @Valid @RequestBody Car carDetails) {
+
+        if (carDetails.getYear() < 1980 || carDetails.getYear() > 2025) {
+            throw new BadRequestException("Year must be between 1980 and 2025");
+        }
+
+        // Проверка существования клиента
+        if (carDetails.getCustomer() == null || carDetails.getCustomer().getId() == null ||
+                !carService.customerExists(carDetails.getCustomer().getId())) {
+            throw new BadRequestException("Customer with specified ID does not exist");
+        }
+
+        // Проверка на уникальность VIN (если VIN уже есть у другой машины)
+        if (carService.existsByVinAndIdNot(carDetails.getVin(), id)) {
+            throw new BadRequestException("VIN already exists for another car");
+        }
+
         Car car = carService.getCarById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Car not found with id " + id));
+
         car.setBrand(carDetails.getBrand());
         car.setModel(carDetails.getModel());
         car.setVin(carDetails.getVin());
         car.setYear(carDetails.getYear());
-        if (carDetails.getCustomer() != null && carDetails.getCustomer().getId() != null) {
-            car.setCustomer(carDetails.getCustomer());
-        }
+        car.setCustomer(carDetails.getCustomer());
+
         Car updatedCar = carService.saveOrUpdateCar(car);
         return ResponseEntity.ok(updatedCar);
     }

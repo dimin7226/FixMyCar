@@ -11,6 +11,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,11 +33,23 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "First name is required")
     private String firstName;
+
+    @NotBlank(message = "Last name is required")
     private String lastName;
     @Column(unique = true)
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
+
     @Column(unique = true)
+    @NotBlank(message = "Phone number is required")
+    @Pattern(
+            regexp = "^\\+?[0-9\\-() ]{7,20}$",
+            message = "Invalid phone number format"
+    )
     private String phone;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL,
@@ -45,4 +61,8 @@ public class Customer {
             orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"customer", "car", "serviceCenter"})
     private List<ServiceRequest> serviceRequests = new ArrayList<>();
+
+    public Customer(Long id) {
+        this.id = id;
+    }
 }

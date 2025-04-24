@@ -21,6 +21,10 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     List<Car> findByModel(String model);
 
+    boolean existsByVinAndIdNot(String vin, Long id);
+
+    boolean existsByVin(String vin);
+
     List<Car> findByBrandAndModel(String brand, String model);
 
     @Query(value = "SELECT * FROM car c WHERE c.brand = :brand AND c.model = :model",

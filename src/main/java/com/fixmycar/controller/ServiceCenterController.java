@@ -27,6 +27,8 @@ public class ServiceCenterController {
     private final ServiceCenterService serviceCenterService;
 
     @GetMapping
+    @Operation(summary = "Получить список сервисов",
+            description = "Возвращает список автомобилей")
     public List<ServiceCenter> getAllServiceCenters() {
         return serviceCenterService.getAllServiceCenters();
     }

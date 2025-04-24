@@ -41,6 +41,22 @@ public class CustomerService {
         return savedCustomer;
     }
 
+    public boolean existsByEmail(String email) {
+        return customerRepository.existsByEmail(email);
+    }
+
+    public boolean existsByPhone(String phone) {
+        return customerRepository.existsByPhone(phone);
+    }
+
+    public boolean existsByEmailAndIdNot(String email, Long id) {
+        return customerRepository.existsByEmailAndIdNot(email, id);
+    }
+
+    public boolean existsByPhoneAndIdNot(String phone, Long id) {
+        return customerRepository.existsByPhoneAndIdNot(phone, id);
+    }
+
     public void deleteCustomer(Long id) {
         customerRepository.deleteById(id);
 

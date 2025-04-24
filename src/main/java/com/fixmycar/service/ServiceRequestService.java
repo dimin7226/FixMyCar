@@ -99,10 +99,7 @@ public class ServiceRequestService {
         request.setStatus(requestDetails.getStatus());
 
         updateEntityReferences(request, requestDetails);
-        ServiceRequest updatedRequest = requestRepository.save(request);
-
-        requestCache.put(updatedRequest.getId(), updatedRequest);
-        return updatedRequest;
+        return requestRepository.save(request); // убрали лишний cache.put
     }
 
     public void deleteRequest(Long id) {
@@ -159,8 +156,7 @@ public class ServiceRequestService {
         ServiceRequest request = getRequestById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Заявка не найдена с id " + id));
         request.setStatus(status);
-        ServiceRequest updatedRequest = requestRepository.save(request);
-        requestCache.put(updatedRequest.getId(), updatedRequest);
-        return updatedRequest;
+        return requestRepository.save(request); // убрали лишний cache.put
     }
+
 }

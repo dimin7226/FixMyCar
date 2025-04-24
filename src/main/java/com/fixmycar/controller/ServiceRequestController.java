@@ -30,6 +30,8 @@ public class ServiceRequestController {
     private static final String REQUEST_NOT_FOUND_ID = "Request not found with id ";
 
     @GetMapping
+    @Operation(summary = "Получить список заявок",
+            description = "Возвращает список заявок")
     public List<ServiceRequest> getAllRequests() {
         return requestService.getAllRequests();
     }
