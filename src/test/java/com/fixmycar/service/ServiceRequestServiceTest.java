@@ -122,6 +122,7 @@ class ServiceRequestServiceTest {
         verify(requestRepo).findByServiceCenterId(1L);
     }
 
+
     @Test
     void getAllRequests_returnsAll() {
         when(requestRepo.findAll()).thenReturn(List.of(request));
@@ -177,13 +178,67 @@ class ServiceRequestServiceTest {
     void testStatusEqualsPending() {
         ServiceRequest request = new ServiceRequest();
         request.setStatus("PENDING");
-        // тестируем код для "PENDING"
     }
 
     @Test
     void testStatusNotPending() {
         ServiceRequest request = new ServiceRequest();
         request.setStatus("DONE");
-        // тестируем код для другого статуса
     }
+
+    @Test
+    void updateRequest_throwsWhenRequestNotFound() {
+        when(requestRepo.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                service.updateRequest(99L, new ServiceRequest()));
+    }
+
+    @Test
+    void getRequestById_returnsEmptyWhenNotFound() {
+        when(cache.get(1L)).thenReturn(null);
+        when(requestRepo.findById(1L)).thenReturn(Optional.empty());
+
+        var result = service.getRequestById(1L);
+
+        assertTrue(result.isEmpty());
+        verify(cache, never()).put(anyLong(), any());
+    }
+
+    @Test
+    void createServiceRequest_throwsWhenCustomerNotFound() {
+        when(customerRepo.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                service.createServiceRequest(99L, 1L, 1L, "Test"));
+    }
+
+    @Test
+    void createServiceRequest_throwsWhenCarNotFound() {
+        when(customerRepo.findById(1L)).thenReturn(Optional.of(customer));
+        when(carRepo.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+                service.createServiceRequest(1L, 99L, 1L, "Test"));
+    }
+
+    @Test
+    void updateEntityReferences_doesNotUpdateWhenIdsAreNull() {
+        ServiceRequest request = new ServiceRequest();
+        request.setCar(car);
+        request.setCustomer(customer);
+        request.setServiceCenter(center);
+
+        ServiceRequest update = new ServiceRequest();
+        update.setCar(new Car());
+        update.setCustomer(new Customer());
+        update.setServiceCenter(new ServiceCenter());
+
+        service.updateEntityReferences(request, update);
+
+        assertEquals(car, request.getCar());
+        assertEquals(customer, request.getCustomer());
+        assertEquals(center, request.getServiceCenter());
+    }
+
 }

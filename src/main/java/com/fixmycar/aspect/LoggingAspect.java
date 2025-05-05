@@ -15,27 +15,25 @@ public class LoggingAspect {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    // Логирование перед выполнением метода
     @Before("execution(* com.fixmycar.controller.*.*(..))")
     public void logBefore(JoinPoint joinPoint) {
-        if (logger.isInfoEnabled()) { // Проверяем, включен ли уровень INFO
-            logger.info("Executing method: {}", joinPoint.getSignature().toShortString());
+        if (logger.isInfoEnabled()) {
+            logger.info("Executing method: {} with args: {}",
+                    joinPoint.getSignature().toShortString(), joinPoint.getArgs());
         }
     }
 
-    // Логирование после успешного выполнения метода
     @AfterReturning(pointcut = "execution(* com.fixmycar.controller.*.*(..))", returning = "result")
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
-        if (logger.isInfoEnabled()) { // Проверяем, включен ли уровень INFO
+        if (logger.isInfoEnabled()) {
             logger.info("Method {} executed successfully. Result: {}",
-                    joinPoint.getSignature().toShortString(), result);
+                    joinPoint.getSignature().toShortString(), (result != null ? result : "void"));
         }
     }
 
-    // Логирование ошибок
     @AfterThrowing(pointcut = "execution(* com.fixmycar.controller.*.*(..))", throwing = "error")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable error) {
-        if (logger.isErrorEnabled()) { // Проверяем, включен ли уровень ERROR
+        if (logger.isErrorEnabled()) {
             logger.error("Error in method: {}. Error: {}",
                     joinPoint.getSignature().toShortString(), error.getMessage());
         }

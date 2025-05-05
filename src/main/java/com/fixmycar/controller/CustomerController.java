@@ -7,9 +7,8 @@ import com.fixmycar.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
-
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,7 +48,7 @@ public class CustomerController {
 
     @PostMapping
     @Operation(summary = "Создать клиента", description = "Создает нового клиента")
-    @ApiResponse(responseCode = "200", description = "Клиент успешно создан")
+    @ApiResponse(responseCode = "201", description = "Клиент успешно создан")
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
     public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) {
 
@@ -76,7 +75,8 @@ public class CustomerController {
                                                    @Valid @RequestBody Customer customer) {
 
         Customer existing = customerService.getCustomerById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id "
+                        + id));
 
         if (customerService.existsByEmailAndIdNot(customer.getEmail(), id)) {
             throw new BadRequestException("Email already exists");

@@ -47,7 +47,7 @@ public class ServiceCenterController {
 
     @PostMapping
     @Operation(summary = "Создать сервисный центр", description = "Создает новый сервисный центр")
-    @ApiResponse(responseCode = "200", description = "Сервисный центр успешно создан")
+    @ApiResponse(responseCode = "201", description = "Сервисный центр успешно создан")
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
     public ResponseEntity<ServiceCenter> createServiceCenter(
             @Valid @RequestBody ServiceCenter serviceCenter) {

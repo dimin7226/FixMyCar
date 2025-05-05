@@ -58,7 +58,7 @@ public class ServiceRequestController {
 
     @PostMapping
     @Operation(summary = "Создать заявку", description = "Создает новую заявку")
-    @ApiResponse(responseCode = "200", description = "Заявка успешно создана")
+    @ApiResponse(responseCode = "201", description = "Заявка успешно создана")
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
     public ResponseEntity<ServiceRequest> createRequest(
             @RequestParam Long customerId,
@@ -78,7 +78,7 @@ public class ServiceRequestController {
     @PostMapping("/full")
     @Operation(summary = "Создать заявку из объекта",
             description = "Создает новую заявку из полного объекта")
-    @ApiResponse(responseCode = "200", description = "Заявка успешно создана")
+    @ApiResponse(responseCode = "201", description = "Заявка успешно создана")
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
     public ResponseEntity<ServiceRequest> createFullRequest(
             @Valid @RequestBody ServiceRequest request) {

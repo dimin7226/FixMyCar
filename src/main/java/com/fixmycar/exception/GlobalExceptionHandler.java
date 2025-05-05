@@ -37,13 +37,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    // Обработка кастомного исключения ValidationException
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleValidationException(ValidationException ex) {
-        // Логируем ошибку с уровнем ERROR
-        logger.error("Validation error: {}", ex.getMessage());
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(TooQuicklyException.class)
+    public ResponseEntity<String> handleTooQuicklyException(TooQuicklyException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.TOO_EARLY);
     }
     
     // Обработка исключения ResourceNotFoundException (404)

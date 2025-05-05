@@ -11,10 +11,17 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/home/cars")
@@ -44,7 +51,7 @@ public class CarController {
 
     @PostMapping
     @Operation(summary = "Создать машину", description = "Создает новую машину")
-    @ApiResponse(responseCode = "200", description = "Машина успешно создана")
+    @ApiResponse(responseCode = "201", description = "Машина успешно создана")
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
     public ResponseEntity<Car> createCar(@Valid @RequestBody Car car) {
 
@@ -59,8 +66,8 @@ public class CarController {
         }
 
         // Клиент должен существовать
-        if (car.getCustomer() == null || car.getCustomer().getId() == null ||
-                !carService.customerExists(car.getCustomer().getId())) {
+        if (car.getCustomer() == null || car.getCustomer().getId() == null
+                || !carService.customerExists(car.getCustomer().getId())) {
             throw new BadRequestException("Customer with specified ID does not exist");
         }
 
@@ -70,8 +77,9 @@ public class CarController {
 
     @PostMapping("/bulk")
     @Operation(summary = "Массовое создание/обновление автомобилей",
-            description = "Создает или обновляет список автомобилей за одну операцию с возможностью фильтрации по году")
-    @ApiResponse(responseCode = "200", description = "Автомобили успешно обработаны")
+            description = "Создает или обновляет список автомобилей за одну "
+                    + "операцию с возможностью фильтрации по году")
+    @ApiResponse(responseCode = "201", description = "Автомобили успешно обработаны")
     @ApiResponse(responseCode = "400", description = "Некорректные данные в запросе")
     public ResponseEntity<List<Car>> processTransactionsBulk(
             @RequestParam(required = false) Integer yearFilter,
@@ -102,8 +110,8 @@ public class CarController {
         }
 
         // Проверка существования клиента
-        if (carDetails.getCustomer() == null || carDetails.getCustomer().getId() == null ||
-                !carService.customerExists(carDetails.getCustomer().getId())) {
+        if (carDetails.getCustomer() == null || carDetails.getCustomer().getId() == null
+                || !carService.customerExists(carDetails.getCustomer().getId())) {
             throw new BadRequestException("Customer with specified ID does not exist");
         }
 

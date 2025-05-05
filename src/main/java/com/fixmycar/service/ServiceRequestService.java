@@ -44,7 +44,7 @@ public class ServiceRequestService {
                 .orElseThrow(() -> new ResourceNotFoundException("Сервисный центр не найден"));
     }
 
-    private void updateEntityReferences(ServiceRequest request, ServiceRequest requestDetails) {
+    void updateEntityReferences(ServiceRequest request, ServiceRequest requestDetails) {
         if (requestDetails.getCar() != null && requestDetails.getCar().getId() != null) {
             request.setCar(findCarById(requestDetails.getCar().getId()));
         }
