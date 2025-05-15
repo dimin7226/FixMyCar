@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class CarService {
     private final CarRepository carRepository;
     private final CustomerRepository customerRepository;
-    private final InMemoryCache<Long, Car> carCache;
+    private final InMemoryCache carCache;
 
     public CarDto carDto(CarDto entity) {
         CarDto dto = new CarDto();
@@ -38,13 +38,15 @@ public class CarService {
 
     public Optional<Car> getCarById(Long id) {
 
-        Car cachedCar = carCache.get(id);
-        if (cachedCar != null) {
-            return Optional.of(cachedCar);
+
+        String cacheKey = "albums_id_" + id;
+        if (carCache.containsKey(cacheKey)) {
+            return Optional.of((Car) carCache.get(cacheKey));
         }
-        Optional<Car> car = carRepository.findById(id);
-        car.ifPresent(acc -> carCache.put(id, acc));
-        return car;
+        Car album = carRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Не найден альбом с ID = " + id));
+        carCache.put(cacheKey, album);
+        return Optional.of(album);
     }
 
     public Car saveOrUpdateCar(Car car) {
@@ -59,7 +61,7 @@ public class CarService {
 
         Car savedCar = carRepository.save(car);
 
-        carCache.put(savedCar.getId(), savedCar);
+       // carCache.put(savedCar.getId(), savedCar);
         return savedCar;
     }
 
@@ -78,6 +80,6 @@ public class CarService {
     public void deleteCar(Long id) {
         carRepository.deleteById(id);
 
-        carCache.evict(id);
+        carCache.clear();
     }
 }

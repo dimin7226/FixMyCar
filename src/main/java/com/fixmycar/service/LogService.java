@@ -32,7 +32,7 @@ public class LogService {
         CompletableFuture.runAsync(() -> {
 
             try {
-                Thread.sleep(15000);
+                Thread.sleep(20000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 taskStatus.put(taskId, "ERROR: Задача прервана");

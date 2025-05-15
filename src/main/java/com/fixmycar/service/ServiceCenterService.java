@@ -17,23 +17,27 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ServiceCenterService {
     private final ServiceCenterRepository serviceCenterRepository;
-    private final InMemoryCache<Long, ServiceCenter> serviceCenterCache;
+    private final InMemoryCache serviceCenterCache;
 
     public List<ServiceCenter> getAllServiceCenters() {
         return serviceCenterRepository.findAll();
     }
 
     public Optional<ServiceCenter> getServiceCenterById(Long id) {
-        ServiceCenter cached = serviceCenterCache.get(id);
-        if (cached != null) {
-            return Optional.of(cached);
+
+        String cacheKey = "albums_id_" + id;
+        if (serviceCenterCache.containsKey(cacheKey)) {
+            return Optional.of((ServiceCenter) serviceCenterCache.get(cacheKey));
         }
-        return serviceCenterRepository.findById(id);
+        ServiceCenter album = serviceCenterRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Не найден альбом с ID = " + id));
+        serviceCenterCache.put(cacheKey, album);
+        return Optional.of(album);
     }
 
     public ServiceCenter saveServiceCenter(ServiceCenter serviceCenter) {
         ServiceCenter savedServiceCenter = serviceCenterRepository.save(serviceCenter);
-        serviceCenterCache.put(savedServiceCenter.getId(), savedServiceCenter);
+       // serviceCenterCache.put(savedServiceCenter.getId(), savedServiceCenter);
         return savedServiceCenter;
     }
 
@@ -47,12 +51,12 @@ public class ServiceCenterService {
         serviceCenter.setPhone(serviceCenterDetails.getPhone());
 
         ServiceCenter updatedServiceCenter = serviceCenterRepository.save(serviceCenter);
-        serviceCenterCache.put(updatedServiceCenter.getId(), updatedServiceCenter);
+       // serviceCenterCache.put(updatedServiceCenter.getId(), updatedServiceCenter);
         return updatedServiceCenter;
     }
 
     public void deleteServiceCenter(Long id) {
         serviceCenterRepository.deleteById(id);
-        serviceCenterCache.evict(id);
+        serviceCenterCache.clear();
     }
 }

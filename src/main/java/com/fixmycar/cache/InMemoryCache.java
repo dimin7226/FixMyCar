@@ -1,100 +1,43 @@
 package com.fixmycar.cache;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InMemoryCache<K, V> {
+public class InMemoryCache {
+    private final Map<String, Object> cache = new LinkedHashMap<>();
+    private static final int MAX_SIZE = 100;
 
-    private static final Logger logger = LoggerFactory.getLogger(InMemoryCache.class);
-
-    private static class CacheEntry<V> {
-        @Getter
-        private final V value;
-        private long expiryTime;
-
-        public CacheEntry(V value, long expiryTime) {
-            this.value = value;
-            this.expiryTime = expiryTime;
+    public void put(String key, Object value) {
+        if (cache.size() >= MAX_SIZE) {
+            String oldestKey = cache.keySet().iterator().next();
+            cache.remove(oldestKey);
         }
+        cache.put(key, value);
 
-        public boolean isExpired() {
-            return System.currentTimeMillis() >= expiryTime;
-        }
-
-        public void updateExpiryTime(long newExpiryTime) {
-            this.expiryTime = newExpiryTime;
-        }
+        Logger logger = Logger.getLogger(InMemoryCache.class.getName());
+        String msg = String.format("New request added to cache. Current cache size: %s",
+                cache.size());
+        logger.info(msg);
     }
 
-    private final Map<K, CacheEntry<V>> cache = new ConcurrentHashMap<>();
-    private final long ttlMillis;
-    private final int maxSize;
-
-    public InMemoryCache() {
-        this(300_000, 100);
+    public Object get(String key) {
+        Logger logger = Logger.getLogger(InMemoryCache.class.getName());
+        String msg = "Request from cache with key: " + key;
+        logger.info(msg);
+        return cache.get(key);
     }
 
-    public InMemoryCache(long ttlMillis, int maxSize) {
-        this.ttlMillis = ttlMillis;
-        this.maxSize = maxSize;
-        logger.info("InMemoryCache instance created with TTL {} milliseconds and maxSize {}",
-                ttlMillis, maxSize);
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleAtFixedRate(this::evictExpiredEntries, ttlMillis,
-                ttlMillis, TimeUnit.MILLISECONDS);
-    }
-
-    public V get(K key) {
-        CacheEntry<V> entry = cache.get(key);
-        if (entry == null) {
-            logger.info("Cache miss for key: {}", key);
-            return null;
-        }
-        if (entry.isExpired()) {
-            logger.info("Cache entry expired for key: {}", key);
-            cache.remove(key);
-            return null;
-        }
-
-        entry.updateExpiryTime(System.currentTimeMillis() + ttlMillis);
-        logger.info("Cache hit for key: {}", key);
-        return entry.getValue();
-    }
-
-    public void put(K key, V value) {
-        if (cache.size() >= maxSize) {
-            logger.info("Cache maximum size reached. Clearing cache.");
-            clear();
-        }
-        CacheEntry<V> entry = new CacheEntry<>(value, System.currentTimeMillis() + ttlMillis);
-        cache.put(key, entry);
-        logger.info("Cache put for key: {}", key);
-    }
-
-    public void evict(K key) {
-        cache.remove(key);
-        logger.info("Cache evict for key: {}", key);
+    public boolean containsKey(String key) {
+        return cache.containsKey(key);
     }
 
     public void clear() {
         cache.clear();
-        logger.info("Cache cleared");
-    }
-
-    private void evictExpiredEntries() {
-        for (Map.Entry<K, CacheEntry<V>> entry : cache.entrySet()) {
-            if (entry.getValue().isExpired()) {
-                cache.remove(entry.getKey());
-                logger.info("Cache entry evicted for key: {}", entry.getKey());
-            }
-        }
+        Logger logger = Logger.getLogger(InMemoryCache.class.getName());
+        String msg = String.format("Cache cleared. Current cache size: %s", cache.size());
+        logger.info(msg);
     }
 }
