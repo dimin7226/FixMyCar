@@ -1,0 +1,32 @@
+.tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+/* Стили для тегов (используются Ant Design Tag, но можно кастомизировать) */
+.ant-tag {
+    background-color: #f0f0f0;
+    border: 1px solid #d4dde1;
+    color: #2d3033;
+    border-radius: 16px;
+    padding: 4px 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.ant-tag:hover {
+    background-color: #e0e0e0;
+}
+
+/* Крестик для удаления тега */
+.ant-tag-close-icon {
+    margin-left: 4px;
+    color: #aa4b41;
+    opacity: 0.7;
+}
+
+.ant-tag-close-icon:hover {
+    opacity: 1;
+}
