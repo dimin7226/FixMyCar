@@ -25,9 +25,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Путь к вашим API эндпоинтам
-                .allowedOrigins("http://localhost:3000") // URL вашего React-приложения
+                //.allowedOrigins("http://localhost:3001", "http://localhost:3000", "http://192.168.103:3001, http://192.168.103:3000") // URL вашего React-приложения
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowCredentials(false);
     }
 }

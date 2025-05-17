@@ -95,7 +95,6 @@ public class CustomerController {
         return ResponseEntity.ok(updatedCustomer);
     }
 
-
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить клиента", description = "Удаляет клиента по ID")
     @ApiResponse(responseCode = "204", description = "Клиент успешно удален")
