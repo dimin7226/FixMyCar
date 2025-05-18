@@ -1,5 +1,6 @@
 package com.fixmycar.controller;
 
+import com.fixmycar.exception.BadRequestException;
 import com.fixmycar.exception.ResourceNotFoundException;
 import com.fixmycar.model.ServiceCenter;
 import com.fixmycar.service.ServiceCenterService;
@@ -51,6 +52,19 @@ public class ServiceCenterController {
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
     public ResponseEntity<ServiceCenter> createServiceCenter(
             @Valid @RequestBody ServiceCenter serviceCenter) {
+        // Проверка уникальности названия
+        if (serviceCenterService.existsByName(serviceCenter.getName())) {
+            throw new BadRequestException("Service center with this name already exists");
+        }
+        // Проверка уникальности адреса
+        if (serviceCenterService.existsByAddress(serviceCenter.getAddress())) {
+            throw new BadRequestException("Service center with this address already exists");
+        }
+        // Проверка уникальности телефона
+        if (serviceCenterService.existsByPhone(serviceCenter.getPhone())) {
+            throw new BadRequestException("Service center with this phone number already exists");
+        }
+        
         ServiceCenter createdServiceCenter = serviceCenterService.saveServiceCenter(serviceCenter);
         return ResponseEntity.ok(createdServiceCenter);
     }
@@ -65,6 +79,23 @@ public class ServiceCenterController {
         ServiceCenter serviceCenter = serviceCenterService.getServiceCenterById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Service center not found with id " + id));
+
+        // Проверка уникальности названия (если изменилось)
+        if (!serviceCenter.getName().equals(serviceCenterDetails.getName()) &&
+            serviceCenterService.existsByName(serviceCenterDetails.getName())) {
+            throw new BadRequestException("Service center with this name already exists");
+        }
+        // Проверка уникальности адреса (если изменился)
+        if (!serviceCenter.getAddress().equals(serviceCenterDetails.getAddress()) &&
+            serviceCenterService.existsByAddress(serviceCenterDetails.getAddress())) {
+            throw new BadRequestException("Service center with this address already exists");
+        }
+        // Проверка уникальности телефона (если изменился)
+        if (!serviceCenter.getPhone().equals(serviceCenterDetails.getPhone()) &&
+            serviceCenterService.existsByPhone(serviceCenterDetails.getPhone())) {
+            throw new BadRequestException("Service center with this phone number already exists");
+        }
+
         serviceCenter.setName(serviceCenterDetails.getName());
         serviceCenter.setAddress(serviceCenterDetails.getAddress());
         serviceCenter.setPhone(serviceCenterDetails.getPhone());

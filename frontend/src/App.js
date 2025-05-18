@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Layout, Menu, Typography } from 'antd';
+import { Layout, Menu, Typography, Button, message } from 'antd';
 import { CarOutlined, ToolOutlined, UserOutlined, ShopOutlined } from '@ant-design/icons';
 import CarList from './components/CarList';
 import CarForm from './components/CarForm';
@@ -36,17 +36,33 @@ const AppContent = () => {
         setSelectedKey('1');
     };
 
+    const handleProfileClick = () => {
+        console.log('Profile button clicked'); // Добавьте эту строку для проверки
+        message.error('Извините! Данная опция в данный момент недоступна');
+    };
+
     return (
         <Layout style={{ minHeight: '100vh' }}>
             <Header className="header">
-                <Link to="/" className="logo" onClick={handleLogoClick}>
-                    <CarOutlined style={{ fontSize: 24, marginRight: 8 }} />
-                    <Title level={4} style={{ color: 'white', margin: 0 }}>FixMyCar</Title>
-                </Link>
+                <div className="header-content">
+                    <Link to="/" className="logo" onClick={handleLogoClick}>
+                        <CarOutlined style={{ fontSize: 24, marginRight: 8 }} />
+                        <Title level={4} style={{ color: 'white', margin: 0 }}>FixMyCar</Title>
+                    </Link>
+                    <div className="profile-button-container">
+                        <Button
+                            type="text"
+                            icon={<UserOutlined style={{ fontSize: 24, color: 'white' }} />}
+                            onClick={handleProfileClick}
+                            className="profile-button"
+                        />
+                    </div>
+                </div>
             </Header>
             <Layout>
                 <Sider width={200} className="site-layout-background">
                     <Menu
+                        className="custom-menu"
                         mode="inline"
                         selectedKeys={[selectedKey]}
                         onClick={handleMenuClick}

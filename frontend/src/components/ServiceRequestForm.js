@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Form, Input, Button, message, Card, Space, Select } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -14,13 +14,29 @@ const ServiceRequestForm = () => {
   const [cars, setCars] = useState([]);
   const [serviceCenters, setServiceCenters] = useState([]);
 
+  const fetchRequest = useCallback(async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/home/requests/${id}`);
+      const requestData = response.data;
+      setInitialValues(requestData);
+      form.setFieldsValue({
+        carId: requestData.car?.id,
+        serviceCenterId: requestData.serviceCenter?.id,
+        description: requestData.description,
+        status: requestData.status
+      });
+    } catch (error) {
+      message.error('Ошибка при загрузке данных заявки');
+    }
+  }, [id, form]);
+
   useEffect(() => {
     fetchCars();
     fetchServiceCenters();
     if (id) {
       fetchRequest();
     }
-  }, [id]);
+  }, [id, fetchRequest]);
 
   const fetchCars = async () => {
     try {
@@ -40,20 +56,7 @@ const ServiceRequestForm = () => {
     }
   };
 
-  const fetchRequest = async () => {
-    try {
-      const response = await axios.get(`http://localhost:8080/home/requests/${id}`);
-      setInitialValues(response.data);
-      form.setFieldsValue({
-        ...response.data,
-        carId: response.data.car?.id,
-        serviceCenterId: response.data.serviceCenter?.id,
-      });
-    } catch (error) {
-      message.error('Ошибка при загрузке данных заявки');
-    }
-  };
-
+          
   const onFinish = async (values) => {
     setLoading(true);
     try {
@@ -63,15 +66,17 @@ const ServiceRequestForm = () => {
         return;
       }
 
-      // Для POST - используем query-параметры
       if (id) {
         // PUT - отправляем в body
-        await axios.put(`http://localhost:8080/home/requests/${id}`, {
-          customerId: selectedCar.customer.id,
-          carId: values.carId,
-          serviceCenterId: values.serviceCenterId,
-          description: values.description
-        });
+        const requestData = {
+          id: parseInt(id),
+          car: { id: parseInt(values.carId) },
+          serviceCenter: { id: parseInt(values.serviceCenterId) },
+          description: values.description,
+          status: values.status
+        };
+        console.log('Отправляемые данные:', requestData); // Для отладки
+        await axios.put(`http://localhost:8080/home/requests/${id}`, requestData);
       } else {
         // POST - отправляем как query-параметры
         const params = new URLSearchParams();
@@ -79,13 +84,13 @@ const ServiceRequestForm = () => {
         params.append('carId', values.carId);
         params.append('serviceCenterId', values.serviceCenterId);
         params.append('description', values.description);
+        params.append('status', 'PENDING');
 
         await axios.post('http://localhost:8080/home/requests', null, {
           params: params
         });
       }
-
-      message.success(`Заявка успешно ${id ? 'обновлена' : 'создана'}`);
+      message.success('Заявка успешно сохранена');
       navigate('/requests');
     } catch (error) {
       message.error('Ошибка при сохранении данных');
@@ -93,6 +98,15 @@ const ServiceRequestForm = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getStatusOptions = () => {
+    return [
+      { value: 'PENDING', label: 'Ожидает' },
+      { value: 'IN_PROGRESS', label: 'В работе' },
+      { value: 'COMPLETED', label: 'Завершено' },
+      { value: 'CANCELLED', label: 'Отменено' }
+    ];
   };
 
   return (
@@ -139,6 +153,22 @@ const ServiceRequestForm = () => {
               ))}
             </Select>
           </Form.Item>
+
+          {id && (
+            <Form.Item
+              name="status"
+              label="Статус заявки"
+              rules={[{ required: true, message: 'Пожалуйста, выберите статус' }]}
+            >
+              <Select placeholder="Выберите статус">
+                {getStatusOptions().map(option => (
+                  <Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          )}
 
           <Form.Item
             name="description"

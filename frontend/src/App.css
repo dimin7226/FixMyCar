@@ -5,7 +5,7 @@
 .header {
     display: flex;
     align-items: center;
-    background: #1677ff !important;
+    background: #242b4e !important;
     padding: 0 24px !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
@@ -85,13 +85,13 @@
 }
 
 .ant-btn-primary {
-    background: #1677ff;
-    border-color: #1677ff;
+    background: #242b4e;
+    border-color: #242b4e;
 }
 
 .ant-btn-primary:hover {
-    background: #4096ff;
-    border-color: #4096ff;
+    background: #434b7e;
+    border-color: #434b7e;
 }
 
 .ant-input {
@@ -101,7 +101,7 @@
 
 .ant-input:hover,
 .ant-input:focus {
-    border-color: #4096ff;
+    border-color: #242b4e;
 }
 
 .ant-select-selector {
@@ -133,8 +133,8 @@
 }
 
 .ant-pagination-item-active {
-    background: #1677ff;
-    border-color: #1677ff;
+    background: #434b7e;
+    border-color: #434b7e;
 }
 
 .ant-pagination-item-active a {
@@ -161,11 +161,11 @@
 
 .ant-input-textarea:hover,
 .ant-input-textarea:focus {
-    border-color: #4096ff;
+    border-color: #242b4e;
 }
 
 .ant-select-focused .ant-select-selector {
-    border-color: #4096ff !important;
+    border-color: #434b7e !important;
     box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
@@ -182,3 +182,56 @@
     background-color: #f5f5f5 !important;
 }
 
+.custom-menu .ant-menu-item-selected {
+    background-color: #242b4e !important;
+    color: #f5f5f5 !important;
+}
+
+.custom-menu .ant-menu-item:hover {
+    background-color: #242b4e !important;
+    color: #f5f5f5 !important;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.profile-button-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 16px;
+}
+
+.profile-button-container {
+    z-index: 1000;
+    position: relative;
+}
+
+.profile-button {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.profile-button:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.05) !important;
+}
+
+.profile-button:active {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(0.95) !important;
+}

@@ -55,4 +55,16 @@ public class ServiceCenterService {
         serviceCenterRepository.deleteById(id);
         serviceCenterCache.evict(id);
     }
+
+    public boolean existsByName(String name) {
+        return serviceCenterRepository.existsByName(name);
+    }
+
+    public boolean existsByAddress(String address) {
+        return serviceCenterRepository.existsByAddress(address);
+    }
+
+    public boolean existsByPhone(String phone) {
+        return serviceCenterRepository.existsByPhone(phone);
+    }
 }

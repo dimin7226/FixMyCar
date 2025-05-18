@@ -55,13 +55,6 @@ const ServiceRequestList = () => {
 
   const columns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 80,
-      render: (text) => <Tag color="geekblue">{text}</Tag>,
-    },
-    {
       title: 'Автомобиль',
       key: 'car',
       width: 180,
@@ -75,7 +68,11 @@ const ServiceRequestList = () => {
       title: 'Сервисный центр',
       key: 'serviceCenter',
       width: 200,
-      render: (_, record) => record.serviceCenter?.name,
+      render: (_, record) => (
+        <span className="text-bold">
+          {record.serviceCenter?.name}
+        </span>
+      ),
     },
     {
       title: 'Описание',
@@ -90,9 +87,15 @@ const ServiceRequestList = () => {
       key: 'status',
       width: 120,
       render: (status) => (
-          <Tag color={getStatusColor(status)} style={{ fontWeight: 500 }}>
-            {getStatusText(status)}
-          </Tag>
+        <Tag color={getStatusColor(status)} style={{ 
+          fontWeight: 500, 
+          padding: '4px 8px',
+          minWidth: '100px',
+          textAlign: 'center',
+          display: 'inline-block'
+        }}>
+          {getStatusText(status)}
+        </Tag>
       ),
     },
     {
@@ -101,18 +104,18 @@ const ServiceRequestList = () => {
       width: 120,
       fixed: 'right',
       render: (_, record) => (
-          <Space size="small">
-            <Button
-                type="text"
-                icon={<EditOutlined style={{ color: '#1890ff' }} />}
-                href={`/requests/edit/${record.id}`}
-            />
-            <Button
-                type="text"
-                icon={<DeleteOutlined style={{ color: '#ff4d4f' }} />}
-                onClick={() => handleDelete(record.id)}
-            />
-          </Space>
+        <Space size="small">
+          <Button
+            type="text"
+            icon={<EditOutlined style={{ color: '#1890ff', fontSize: '16px' }} />}
+            href={`/requests/edit/${record.id}`}
+          />
+          <Button
+            type="text"
+            icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '16px' }} />}
+            onClick={() => handleDelete(record.id)}
+          />
+        </Space>
       ),
     },
   ];
@@ -150,14 +153,21 @@ const ServiceRequestList = () => {
             font-weight: 500;
           }
           .ant-table .table-row:hover td {
-            background: #fafafa !important;
+            background: #f5f5f5 !important;
           }
           .ant-table-thead > tr > th {
-            background: #f8f8f8;
-            font-weight: 500;
+            background: #f0f2f5;
+            font-weight: 600;
+            color: #262626;
           }
           .ant-card-head-title {
             padding: 16px 0;
+          }
+            .ant-table-tbody > tr > td {
+            padding: 16px 8px;
+          }
+          .ant-tag {
+            border-radius: 4px;
           }
         `}</style>
       </div>

@@ -35,13 +35,6 @@ const ServiceCenterList = () => {
 
   const columns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 80,
-      render: (text) => <Tag color="geekblue">{text}</Tag>,
-    },
-    {
       title: 'Название',
       dataIndex: 'name',
       key: 'name',
@@ -53,13 +46,14 @@ const ServiceCenterList = () => {
       dataIndex: 'address',
       key: 'address',
       width: 300,
+      render: (text) => <span className="text-regular">{text}</span>,
     },
     {
       title: 'Телефон',
       dataIndex: 'phone',
       key: 'phone',
       width: 150,
-      render: (text) => <a href={`tel:${text}`}>{text}</a>,
+      render: (text) => <a href={`tel:${text}`} className="link">{text}</a>,
     },
     {
       title: 'Действия',
@@ -67,18 +61,18 @@ const ServiceCenterList = () => {
       width: 120,
       fixed: 'right',
       render: (_, record) => (
-          <Space size="small">
-            <Button
-                type="text"
-                icon={<EditOutlined style={{ color: '#1890ff' }} />}
-                href={`/service-centers/edit/${record.id}`}
-            />
-            <Button
-                type="text"
-                icon={<DeleteOutlined style={{ color: '#ff4d4f' }} />}
-                onClick={() => handleDelete(record.id)}
-            />
-          </Space>
+        <Space size="small">
+          <Button
+            type="text"
+            icon={<EditOutlined style={{ color: '#1890ff', fontSize: '16px' }} />}
+            href={`/service-centers/edit/${record.id}`}
+          />
+          <Button
+            type="text"
+            icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '16px' }} />}
+            onClick={() => handleDelete(record.id)}
+          />
+        </Space>
       ),
     },
   ];
@@ -115,15 +109,29 @@ const ServiceCenterList = () => {
         .text-bold {
           font-weight: 500;
         }
+        .text-regular {
+          color: #595959;
+        }
+        .link {
+          color: #1890ff;
+          text-decoration: none;
+        }
+        .link:hover {
+          text-decoration: underline;
+        }
         .ant-table .table-row:hover td {
-          background: #fafafa !important;
+          background: #f5f5f5 !important;
         }
         .ant-table-thead > tr > th {
-          background: #f8f8f8;
-          font-weight: 500;
+          background: #f0f2f5;
+          font-weight: 600;
+          color: #262626;
         }
         .ant-card-head-title {
           padding: 16px 0;
+        }
+        .ant-table-tbody > tr > td {
+          padding: 16px 8px;
         }
       `}</style>
       </div>

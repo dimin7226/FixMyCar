@@ -63,13 +63,6 @@ const CustomerList = () => {
 
   const columns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 80,
-      render: (text) => <Tag color="geekblue">{text}</Tag>,
-    },
-    {
       title: 'Имя',
       dataIndex: 'firstName',
       key: 'firstName',
@@ -81,13 +74,14 @@ const CustomerList = () => {
       dataIndex: 'lastName',
       key: 'lastName',
       width: 150,
+      render: (text) => <span className="text-bold">{text}</span>,
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
       width: 200,
-      render: (text) => <a href={`mailto:${text}`}>{text}</a>,
+      render: (text) => <a href={`mailto:${text}`} className="link">{text}</a>,
     },
     {
       title: 'Телефон',
@@ -95,9 +89,9 @@ const CustomerList = () => {
       key: 'phone',
       width: 180,
       render: (text) => (
-          <a href={`tel:${text.replace(/\D/g, '')}`}>
-            {formatPhoneNumber(text)}
-          </a>
+        <a href={`tel:${text.replace(/\D/g, '')}`} className="link">
+          {formatPhoneNumber(text)}
+        </a>
       ),
     },
     {
@@ -106,18 +100,18 @@ const CustomerList = () => {
       width: 120,
       fixed: 'right',
       render: (_, record) => (
-          <Space size="small">
-            <Button
-                type="text"
-                icon={<EditOutlined style={{ color: '#1890ff' }} />}
-                href={`/customers/edit/${record.id}`}
-            />
-            <Button
-                type="text"
-                icon={<DeleteOutlined style={{ color: '#ff4d4f' }} />}
-                onClick={() => handleDelete(record.id)}
-            />
-          </Space>
+        <Space size="small">
+          <Button
+            type="text"
+            icon={<EditOutlined style={{ color: '#1890ff', fontSize: '16px' }} />}
+            href={`/customers/edit/${record.id}`}
+          />
+          <Button
+            type="text"
+            icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: '16px' }} />}
+            onClick={() => handleDelete(record.id)}
+          />
+        </Space>
       ),
     },
   ];
@@ -154,15 +148,26 @@ const CustomerList = () => {
           .text-bold {
             font-weight: 500;
           }
+          .link {
+            color: #1890ff;
+            text-decoration: none;
+          }
+          .link:hover {
+            text-decoration: underline;
+          }
           .ant-table .table-row:hover td {
-            background: #fafafa !important;
+            background: #f5f5f5 !important;
           }
           .ant-table-thead > tr > th {
-            background: #f8f8f8;
-            font-weight: 500;
+            background: #f0f2f5;
+            font-weight: 600;
+            color: #262626;
           }
           .ant-card-head-title {
             padding: 16px 0;
+          }
+          .ant-table-tbody > tr > td {
+            padding: 16px 8px;
           }
         `}</style>
       </div>
