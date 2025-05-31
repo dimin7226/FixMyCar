@@ -81,18 +81,18 @@ public class ServiceCenterController {
                         "Service center not found with id " + id));
 
         // Проверка уникальности названия (если изменилось)
-        if (!serviceCenter.getName().equals(serviceCenterDetails.getName()) &&
-            serviceCenterService.existsByName(serviceCenterDetails.getName())) {
+        if (!serviceCenter.getName().equals(serviceCenterDetails.getName())
+                && serviceCenterService.existsByName(serviceCenterDetails.getName())) {
             throw new BadRequestException("Service center with this name already exists");
         }
         // Проверка уникальности адреса (если изменился)
-        if (!serviceCenter.getAddress().equals(serviceCenterDetails.getAddress()) &&
-            serviceCenterService.existsByAddress(serviceCenterDetails.getAddress())) {
+        if (!serviceCenter.getAddress().equals(serviceCenterDetails.getAddress())
+                && serviceCenterService.existsByAddress(serviceCenterDetails.getAddress())) {
             throw new BadRequestException("Service center with this address already exists");
         }
         // Проверка уникальности телефона (если изменился)
-        if (!serviceCenter.getPhone().equals(serviceCenterDetails.getPhone()) &&
-            serviceCenterService.existsByPhone(serviceCenterDetails.getPhone())) {
+        if (!serviceCenter.getPhone().equals(serviceCenterDetails.getPhone())
+                && serviceCenterService.existsByPhone(serviceCenterDetails.getPhone())) {
             throw new BadRequestException("Service center with this phone number already exists");
         }
 
