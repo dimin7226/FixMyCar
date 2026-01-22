@@ -19,6 +19,7 @@ pipeline {
         stage('Build and Run with Docker Compose') {
             steps {
                 sh '''
+                    docker-compose down || true
                     docker compose up --build -d
                 '''
             }

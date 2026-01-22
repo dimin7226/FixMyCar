@@ -42,6 +42,7 @@ public class SecurityConfig {
                 "http://localhost:3000",          // ← ДОБАВЬТЕ ЭТО!
                 "http://127.0.0.1:3000",
                 "http://192.168.1.*:8080",
+                "http://35.228.49.10:8080",
                 "http://192.168.1.*:3000",
                 "http://192.168.10.100:3000",    // если нужно
                 "https://fixmycar-frontend.onrender.com"
