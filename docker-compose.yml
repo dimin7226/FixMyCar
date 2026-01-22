@@ -1,10 +1,14 @@
+version: "3.9"
+
 services:
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    ports:
-      - "3000:80"
+  database:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - fixmycar_postgres_data:/var/lib/postgresql/data
     networks:
       - fixmycar
 
@@ -15,17 +19,32 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_URL=${DB_URL}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
       - database
     networks:
       - fixmycar
 
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "80:80"
+    environment:
+      - PORT=80
+    depends_on:
+      - backend
+    networks:
+      - fixmycar
+
 networks:
   fixmycar:
-      driver: bridge
+    driver: bridge
 
 volumes:
   fixmycar_postgres_data:

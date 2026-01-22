@@ -1,5 +1,6 @@
 package com.fixmycar.controller;
 
+import com.fixmycar.exception.BadRequestException;
 import com.fixmycar.exception.ResourceNotFoundException;
 import com.fixmycar.model.Car;
 import com.fixmycar.model.Customer;
@@ -50,6 +51,12 @@ public class CustomerController {
     @ApiResponse(responseCode = "200", description = "Клиент успешно создан")
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+        if (customerService.existsByEmail(customer.getEmail())) {
+            throw new BadRequestException("Email already exists");
+        }
+        if (customerService.existsByPhone(customer.getPhone())) {
+            throw new BadRequestException("Phone number already exists");
+        }
         Customer createdCustomer = customerService.saveOrUpdateCustomer(customer);
         return ResponseEntity.ok(createdCustomer);
     }
@@ -61,14 +68,23 @@ public class CustomerController {
     @ApiResponse(responseCode = "404", description = "Данные о клиенте не найдены")
     public ResponseEntity<Customer> updateCustomer(@PathVariable Long id,
                                                    @RequestBody Customer customer) {
-        Customer customerDetails = customerService.getCustomerById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Customer not found with id " + id));
-        customer.setFirstName(customerDetails.getFirstName());
-        customer.setLastName(customerDetails.getLastName());
-        customer.setPhone(customerDetails.getPhone());
-        customer.setEmail(customerDetails.getEmail());
-        Customer updatedCustomer = customerService.saveOrUpdateCustomer(customer);
+        Customer existing = customerService.getCustomerById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + id));
+
+        if (customerService.existsByEmailAndIdNot(customer.getEmail(), id)) {
+            throw new BadRequestException("Email already exists");
+        }
+        if (customerService.existsByPhoneAndIdNot(customer.getPhone(), id)) {
+            throw new BadRequestException("Phone number already exists");
+        }
+
+        // Обновляем данные существующего клиента
+        existing.setFirstName(customer.getFirstName());
+        existing.setLastName(customer.getLastName());
+        existing.setEmail(customer.getEmail());
+        existing.setPhone(customer.getPhone());
+
+        Customer updatedCustomer = customerService.saveOrUpdateCustomer(existing);
         return ResponseEntity.ok(updatedCustomer);
     }
 
@@ -77,6 +93,8 @@ public class CustomerController {
     @ApiResponse(responseCode = "204", description = "Клиент успешно удален")
     @ApiResponse(responseCode = "404", description = "Клиент не найден")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+        customerService.getCustomerById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + id));
         customerService.deleteCustomer(id);
         return ResponseEntity.noContent().build();
     }
@@ -86,13 +104,11 @@ public class CustomerController {
     @ApiResponse(responseCode = "200", description = "Автомобили найдены")
     @ApiResponse(responseCode = "404", description = "Пользователь не найден")
     public ResponseEntity<List<Car>> getUserCars(@PathVariable Long id) {
-        // Проверяем существование пользователя
         Customer customer = customerService.getCustomerById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Customer not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + id));
 
-        // Получаем автомобили пользователя через CarService
-        // Нужно добавить метод в CarService
-        return ResponseEntity.ok(carService.getCarsByCustomerId(id));
+        // Нужно, чтобы CarService имел метод getCarsByCustomerId(Long customerId)
+        List<Car> cars = carService.getCarsByCustomerId(id);
+        return ResponseEntity.ok(cars);
     }
 }

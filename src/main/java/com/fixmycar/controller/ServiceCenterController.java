@@ -66,6 +66,8 @@ public class ServiceCenterController {
         serviceCenter.setName(serviceCenterDetails.getName());
         serviceCenter.setAddress(serviceCenterDetails.getAddress());
         serviceCenter.setPhone(serviceCenterDetails.getPhone());
+        serviceCenter.setLatitude(serviceCenterDetails.getLatitude());
+        serviceCenter.setLongitude(serviceCenterDetails.getLongitude());
         if (serviceCenterDetails.getServiceRequests() != null) {
             serviceCenter.setServiceRequests(serviceCenterDetails.getServiceRequests());
         }

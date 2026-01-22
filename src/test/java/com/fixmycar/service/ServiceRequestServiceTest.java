@@ -78,6 +78,7 @@ class ServiceRequestServiceTest {
         update.setStatus("DONE");
 
         var result = service.updateRequest(1L, update);
+
         assertEquals("DONE", result.getStatus());
         verify(cache).put(1L, result);
     }

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 public class CarService {
     private final CarRepository carRepository;
     private final CustomerRepository customerRepository;
-    //private final InMemoryCache<Long, Car> carCache;
+    private final InMemoryCache<Long, Car> carCache;
 
     public boolean existsByVin(String vin) {
         return carRepository.existsByVin(vin);
@@ -41,13 +41,13 @@ public class CarService {
     }
 
     public Optional<Car> getCarById(Long id) {
-//
-//        Car cachedCar = carCache.get(id);
-//        if (cachedCar != null) {
-//            return Optional.of(cachedCar);
-//        }
+
+        Car cachedCar = carCache.get(id);
+        if (cachedCar != null) {
+            return Optional.of(cachedCar);
+        }
         Optional<Car> car = carRepository.findById(id);
-       // car.ifPresent(acc -> carCache.put(id, acc));
+        car.ifPresent(acc -> carCache.put(id, acc));
         return car;
     }
 
@@ -63,14 +63,13 @@ public class CarService {
 
         Car savedCar = carRepository.save(car);
 
-        //carCache.put(savedCar.getId(), savedCar);
+        carCache.put(savedCar.getId(), savedCar);
         return savedCar;
     }
 
     public void deleteCar(Long id) {
         carRepository.deleteById(id);
-
-        //carCache.evict(id);
+        carCache.evict(id);
     }
 
     public List<Car> getCarsByCustomerId(Long customerId) {
@@ -78,10 +77,9 @@ public class CarService {
             return carRepository.findByCustomerId(customerId);
         } catch (Exception e) {
             log.error("Ошибка получения автомобилей для клиента {}: {}", customerId, e.getMessage());
-            // Возвращаем автомобили через клиента
             Customer customer = customerRepository.findById(customerId).orElse(null);
             if (customer != null && customer.getCars() != null) {
-                return customer.getCars(); // ← ПРОБЛЕМА ЗДЕСЬ!
+                return customer.getCars();
             }
             return Collections.emptyList();
         }

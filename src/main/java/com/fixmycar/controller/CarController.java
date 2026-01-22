@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import java.time.Year;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Car Controller", description = "API для управления автомобилями")
 public class CarController {
     private final CarService carService;
+    int currentYear = Year.now().getValue();
 
     @GetMapping
     public List<Car> getAllCars() {
@@ -49,8 +52,19 @@ public class CarController {
     @ApiResponse(responseCode = "200", description = "Машина успешно создана")
     @ApiResponse(responseCode = "400", description = "Некорректные данные")
     public ResponseEntity<Car> createCar(@Valid @RequestBody Car car) {
+
         if (car.getCustomer() == null || car.getCustomer().getId() == null) {
-            throw new BadRequestException("User ID is required");
+            throw new BadRequestException("Customer with specified ID does not exist");
+        }
+
+        if (car.getYear() < 1900 || car.getYear() > currentYear) {
+            throw new BadRequestException(
+                    String.format("Year must be between 1900 and %d", currentYear)
+            );
+        }
+
+        if (carService.existsByVin(car.getVin())) {
+            throw new BadRequestException("Car with this VIN already exists");
         }
         Car createdAccount = carService.saveOrUpdateCar(car);
         return ResponseEntity.ok(createdAccount);
@@ -65,6 +79,16 @@ public class CarController {
                                          @Valid @RequestBody Car carDetails) {
         Car car = carService.getCarById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Car not found with id " + id));
+
+        if (car.getYear() < 1900 || car.getYear() > currentYear) {
+            throw new BadRequestException(
+                    String.format("Year must be between 1900 and %d", currentYear)
+            );
+        }
+
+        if (carDetails.getCustomer() == null || carDetails.getCustomer().getId() == null) {
+            throw new BadRequestException("Customer with specified ID does not exist");
+        }
         car.setBrand(carDetails.getBrand());
         car.setModel(carDetails.getModel());
         car.setVin(carDetails.getVin());

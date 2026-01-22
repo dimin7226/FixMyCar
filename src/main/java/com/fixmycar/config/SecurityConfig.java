@@ -37,22 +37,24 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 🔹 Разрешаем только твой фронтенд (замени на реальный URL фронтенда)
-        configuration.setAllowedOrigins(List.of(
-                 "http://192.168.10.100", // локальный фронтенд
-                "https://fixmycar-frontend.onrender.com" // деплой на Render/Nginx
+        // 🔹 Добавьте localhost:3000 в разрешенные origins!
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",          // ← ДОБАВЬТЕ ЭТО!
+                "http://127.0.0.1:3000",
+                "http://192.168.1.*:8080",
+                "http://192.168.1.*:3000",
+                "http://192.168.10.100:3000",    // если нужно
+                "https://fixmycar-frontend.onrender.com"
         ));
 
-        // Методы, которые будут использоваться фронтендом
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"
         ));
 
-        // Разрешаем любые заголовки
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // кэширование preflight-запросов на 1 час
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

@@ -10,4 +10,6 @@ public class ServiceCenterDto {
     String name;
     String address;
     String phone;
+    String latitude;
+    String longitude;
 }

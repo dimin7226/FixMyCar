@@ -30,6 +30,10 @@ public class ServiceCenter {
     private String address;
     @Column(unique = true)
     private String phone;
+    @Column(name = "latitude")
+    private Double latitude;
+    @Column(name = "longitude")
+    private Double longitude;
 
     @OneToMany(mappedBy = "serviceCenter", cascade = CascadeType.ALL)
     @JsonIgnore

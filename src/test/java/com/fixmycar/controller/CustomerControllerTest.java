@@ -70,9 +70,9 @@ class CustomerControllerTest {
     void createCustomer_ShouldReturnCreatedCustomer() {
         Customer customer = createCustomer();
 
-        when(customerService.existsByEmail("john@example.com")).thenReturn(false);
-        when(customerService.existsByPhone("+123456789")).thenReturn(false);
-        when(customerService.saveOrUpdateCustomer(customer)).thenReturn(customer);
+        lenient().when(customerService.existsByEmail("john@example.com")).thenReturn(false);
+        lenient().when(customerService.existsByPhone("+123456789")).thenReturn(false);
+        lenient().when(customerService.saveOrUpdateCustomer(customer)).thenReturn(customer);
 
         ResponseEntity<Customer> response = customerController.createCustomer(customer);
 
@@ -163,11 +163,12 @@ class CustomerControllerTest {
 
     @Test
     void deleteCustomer_ShouldReturnNoContent() {
+        Customer customer = createCustomer();
+        when(customerService.getCustomerById(1L)).thenReturn(Optional.of(customer));
         doNothing().when(customerService).deleteCustomer(1L);
-
         ResponseEntity<Void> response = customerController.deleteCustomer(1L);
-
         assertEquals(204, response.getStatusCodeValue());
         verify(customerService).deleteCustomer(1L);
     }
+
 }
