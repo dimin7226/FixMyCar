@@ -1,12 +1,7 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'maven'
-    }
-
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -15,14 +10,27 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                sh 'mvn clean verify'
+                sh '''
+                    chmod +x mvnw
+                    ./mvnw clean verify
+                '''
             }
         }
 
         stage('Build and Run with Docker Compose') {
             steps {
-                sh 'docker-compose build; docker-compose up -d'
+                sh '''
+                    docker-compose build
+                    docker-compose up -d
+                '''
             }
+        }
+    }
+
+    post {
+        always {
+            echo "Build completed"
+            sh 'docker-compose ps || true'
         }
     }
 }
