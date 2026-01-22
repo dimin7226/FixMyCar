@@ -11,7 +11,6 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-                    chmod +x mvnw
                     ./mvnw clean verify
                 '''
             }
@@ -20,8 +19,7 @@ pipeline {
         stage('Build and Run with Docker Compose') {
             steps {
                 sh '''
-                    docker compose build
-                    docker compose up -d
+                    docker compose up --build -d
                 '''
             }
         }
