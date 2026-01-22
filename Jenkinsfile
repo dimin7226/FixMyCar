@@ -20,8 +20,8 @@ pipeline {
         stage('Build and Run with Docker Compose') {
             steps {
                 sh '''
-                    docker-compose build
-                    docker-compose up -d
+                    docker compose build
+                    docker compose up -d
                 '''
             }
         }
@@ -30,7 +30,7 @@ pipeline {
     post {
         always {
             echo "Build completed"
-            sh 'docker-compose ps || true'
+            sh 'docker compose ps || true'
         }
     }
 }
