@@ -8,6 +8,14 @@ pipeline {
             }
         }
 
+        stage('Setup Environment') {
+            steps {
+                withCredentials([file(credentialsId: 'fixmycar-dev-env', variable: 'ENV_FILE')]) {
+                    sh 'cp $ENV_FILE .env'
+                }
+            }
+        }
+
         stage('Build & Test') {
             steps {
                 sh '''
