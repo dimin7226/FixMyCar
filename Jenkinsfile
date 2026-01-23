@@ -11,7 +11,10 @@ pipeline {
         stage('Setup Environment') {
             steps {
                 withCredentials([file(credentialsId: 'fixmycar-dev-env', variable: 'ENV_FILE')]) {
-                    sh 'cp $ENV_FILE .env'
+                    sh '''
+                        rm -f .env 2>/dev/null || true
+                        cp $ENV_FILE .env
+                    '''
                 }
             }
         }
