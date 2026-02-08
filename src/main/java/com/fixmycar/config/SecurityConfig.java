@@ -38,9 +38,10 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://127.0.0.1:3000",
-                "http://fixmycar.2bd.net:8080",
-                "https://fixmycar.2bd.net:8080"
+                "http://fixmycar.2bd.net",
+                "https://fixmycar.2bd.net",
+                "http://www.fixmycar.2bd.net",
+                "https://www.fixmycar.2bd.net"
         ));
 
         configuration.setAllowedMethods(Arrays.asList(
