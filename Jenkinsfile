@@ -31,15 +31,14 @@ pipeline {
                     file(credentialsId: 'fixmycar-ssl-ca', variable: 'CA_FILE')
                 ]) {
                     sh '''
-                        mkdir -p ./ssl/fixmycar.2bd.net
-                        cp $CERT_FILE ./ssl/fixmycar.2bd.net/fullchain.cer
-                        cp $KEY_FILE ./ssl/fixmycar.2bd.net/fixmycar.2bd.net.key
-                        cp $CA_FILE ./ssl/fixmycar.2bd.net/ca.cer
+                        mkdir -p $WORKSPACE/ssl/fixmycar.2bd.net
+                        cp $CERT_FILE $WORKSPACE/ssl/fixmycar.2bd.net/fullchain.cer
+                        cp $KEY_FILE $WORKSPACE/ssl/fixmycar.2bd.net/fixmycar.2bd.net.key
+                        cp $CA_FILE $WORKSPACE/ssl/fixmycar.2bd.net/ca.cer
                     '''
                 }
             }
         }
-
 
         stage('Build & Test') {
             steps {
