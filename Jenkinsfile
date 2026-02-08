@@ -35,7 +35,7 @@ pipeline {
             steps {
                 sh '''
                     docker-compose down || true
-                    docker compose up --build -d
+                    docker-compose up --build -d
                 '''
             }
         }
@@ -44,7 +44,7 @@ pipeline {
     post {
         always {
             echo "Build completed"
-            sh 'docker compose ps || true'
+            sh 'docker-compose ps || true'
         }
     }
 }
