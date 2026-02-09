@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -20,14 +21,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Включаем CORS с нашей конфигурацией
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // Отключаем CSRF, чтобы фронтенд мог делать POST/PUT/DELETE без токена
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable) // REST API, stateless, no cookies
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Разрешаем все запросы (пока без авторизации, можно потом добавить JWT)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                // Заголовки, чтобы H2 console (если используется) работала
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();

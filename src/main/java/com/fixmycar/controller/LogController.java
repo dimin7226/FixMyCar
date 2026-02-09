@@ -28,6 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Log Controller", description = "API для работы с лог-файлами")
 public class LogController {
 
+    private static final Path TEMP_DIR =
+            Paths.get(System.getProperty("java.io.tmpdir"), "fixmycar-logs");
+
     private static final String LOG_FILE_PATH = "./FixMyCar.log";
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -64,8 +67,14 @@ public class LogController {
             return ResponseEntity.notFound().build();
         }
 
-        // Create temp file for download
-        Path tempLogFile = Files.createTempFile("logs-" + dateStr, ".log");
+        Files.createDirectories(TEMP_DIR);
+
+        Path tempLogFile = Files.createTempFile(
+                TEMP_DIR,
+                "logs-" + dateStr + "-",
+                ".log"
+        );
+
         Files.write(tempLogFile, filteredLogs.getBytes());
 
         Resource resource = new UrlResource(tempLogFile.toUri());
